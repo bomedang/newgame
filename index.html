@@ -48,9 +48,11 @@
   <div class="panel">
     <div class="entry"><span class="label">FOCUS</span><span class="value" id="nodeName">Idle</span></div>
     <div class="entry"><span class="label">ENERGY</span><span class="value" id="energyValue">--</span></div>
+    <div class="entry"><span class="label">SCORE</span><span class="value" id="scoreValue">0000</span></div>
     <div class="entry"><span class="label">SANITY</span><span class="value" id="sanityValue">--</span></div>
     <div class="entry"><span class="label">ANOMALY</span><span class="value" id="anomalyValue">--</span></div>
     <div class="entry"><span class="label">PHASE</span><span class="value" id="phaseValue">--</span></div>
+    <div class="entry"><span class="label">GOAL</span><span class="value" id="goalValue">--</span></div>
   </div>
 </div>
 <div id="log"></div>
@@ -63,9 +65,11 @@
   const hintEl = document.getElementById('hint');
   const nodeNameEl = document.getElementById('nodeName');
   const energyEl = document.getElementById('energyValue');
+  const scoreValueEl = document.getElementById('scoreValue');
   const sanityEl = document.getElementById('sanityValue');
   const anomalyEl = document.getElementById('anomalyValue');
   const phaseEl = document.getElementById('phaseValue');
+  const goalValueEl = document.getElementById('goalValue');
 
   let width = 0;
   let height = 0;
@@ -99,6 +103,15 @@
     logDensity: 0,
     hiddenSeed: Math.random(),
     revealedText: false,
+    score: 0,
+    progress: 0,
+    goal: 18,
+    coreCharge: 0,
+    objective: 'Stabilize communication by activating network nodes.',
+    completed: false,
+    failed: false,
+    activeStreak: 0,
+    milestone: 0,
   };
 
   const nodeTemplates = [
@@ -336,26 +349,52 @@
   }
 
   function handleInteraction() {
-    if (!state.activeNode) return;
+    if (!state.activeNode || state.completed || state.failed) return;
     const node = state.activeNode;
     node.interactions += 1;
     state.memory.interactions += 1;
+    state.progress += 1;
+    state.activeStreak += 1;
     node.state = Math.min(1, node.state + 0.2);
+    state.coreCharge += 4 + node.state * 2;
+    state.score += 14 + Math.round(node.state * 10) + (node.hidden ? 12 : 0);
     state.energy = clamp(state.energy + 3 + node.state * 5, 0, 120);
-    state.anomaly += 1.2;
-    state.sanity += 0.4;
+    state.anomaly += 1.1;
+    state.sanity += 0.35;
+
+    if (node.label === 'RELAY') {
+      const relief = 1.8 + node.state * 1.4;
+      state.anomaly = clamp(state.anomaly - relief, 0, 110);
+      state.score += 8;
+      addLog('[RELAY] signal decay suppressed.', 1);
+    }
+    if (node.label === 'ARCHIVE') {
+      state.score += 10;
+      addLog('[ARCHIVE] stale memory recombined into a usable pattern.', 1);
+    }
+    if (node.label === 'MIRROR') {
+      state.score += 12;
+      addLog('[MIRROR] reflection creates a new hidden trajectory.', 1);
+      if (node.interactions === 2 && !state.secret.mirror) {
+        state.secret.mirror = true;
+        addLog('[SECRET] reflection loop unlocked. a new path appears.', 3);
+        state.field.push(createGhostNode());
+      }
+    }
+    if (node.label === 'TERMINAL') {
+      state.energy = clamp(state.energy + 9, 0, 130);
+      state.anomaly = clamp(state.anomaly - 0.8, 0, 110);
+      addLog('[TERMINAL] power allocation stabilized.', 1);
+    }
+
     addLog(`[INTERACT] ${node.label}: ${node.prompt}`, 1);
 
     if (node.hidden && node.interactions === 1) {
       addLog('[DISCOVERY] hidden protocol fragment exposed.', 2);
       state.secret.archive = true;
+      state.score += 18;
     }
-    if (node.interactions === 3 && node.label === 'MIRROR' && !state.secret.mirror) {
-      state.secret.mirror = true;
-      addLog('[SECRET] reflection loop unlocked. a new path appears.', 3);
-      state.field.push(createGhostNode());
-    }
-    if (state.memory.interactions > 12 && !state.secret.revealedText && Math.random() < 0.2) {
+    if (state.memory.interactions > 12 && !state.secret.revealedText && Math.random() < 0.28) {
       state.secret.revealedText = true;
       addLog('[MEMORY] the network begins to speak in its own words.', 3);
     }
@@ -373,6 +412,12 @@
     }
     if (node.interactions % 2 === 0 && Math.random() < 0.18) {
       state.corruption.timer = 0.8 + Math.random() * 0.8;
+    }
+    if (state.progress >= state.goal && !state.completed) {
+      state.completed = true;
+      state.objective = 'Network stabilized. secrets are accessible.';
+      addLog('[CORE] threshold reached. the network stabilizes briefly.', 3);
+      playPulse(0.24, 0.18);
     }
     playPulse(0.12, 0.12);
   }
@@ -482,8 +527,21 @@
     state.corruption.framed = state.corruption.timer > 0 ? Math.random() * 2 : 0;
     state.glitch.sway = Math.sin(state.time * 12) * 0.8;
 
+    if (!state.completed && !state.failed) {
+      if (state.energy <= 0) {
+        state.failed = true;
+        state.objective = 'Energy collapse. the lattice shatters.';
+        addLog('[SYSTEM] energy collapse. the network starts to fracture.', 3);
+      }
+      if (state.anomaly >= 100) {
+        state.failed = true;
+        state.objective = 'Anomaly overload. the system rejects your presence.';
+        addLog('[SYSTEM] anomaly overload. the network is rejecting input.', 3);
+      }
+    }
+
     const eventReady = state.time - state.lastEventAt > state.eventRate;
-    if (eventReady) scheduleEvent();
+    if (eventReady && !state.completed && !state.failed) scheduleEvent();
   }
 
   function drawBackground() {
@@ -635,9 +693,11 @@
   function drawHud() {
     nodeNameEl.textContent = state.activeNode ? `${state.activeNode.label} ${state.activeNode.hidden ? '(latent)' : ''}` : 'Idle';
     energyEl.textContent = `${formatValue(state.energy, 3)} / 120`;
+    scoreValueEl.textContent = formatValue(state.score, 4);
     sanityEl.textContent = `${formatValue(state.sanity, 3)}%`;
     anomalyEl.textContent = `${formatValue(state.anomaly, 3)}%`;
     phaseEl.textContent = ['Curious', 'Warm', 'Uneasy', 'Obsessed', 'Paranoid', 'Beyond'][state.phase] || 'Unknown';
+    goalValueEl.textContent = state.completed ? 'STABILIZED' : state.failed ? 'FRACTURED' : `${state.progress}/${state.goal}`;
 
     logEl.innerHTML = '';
     state.logs.forEach((entry, idx) => {
@@ -742,8 +802,9 @@
     const startAngle = Math.random() * Math.PI * 2;
     state.cursor.x = width / 2 + Math.cos(startAngle) * 58;
     state.cursor.y = height / 2 + Math.sin(startAngle) * 58;
-    addLog('[SYSTEM] initialization complete. press keys to travel the network.', 1);
-    addLog('[TIP] use arrow keys / WASD to move. press E to interact, Q to inspect.', 1);
+    addLog('[SYSTEM] initialization complete. stabilize the network before anomaly rises.', 1);
+    addLog('[TIP] use arrow keys / WASD to move. press E to interact, Q to inspect, hold Shift for silent mode.', 1);
+    addLog(`[OBJECTIVE] activate ${state.goal} nodes to stabilize the core.`, 1);
     initInput();
     requestAnimationFrame(animate);
   }
