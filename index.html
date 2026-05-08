@@ -1,71 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>Echo Grid</title>
+<title>Neon Skies</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>
   :root {
     color-scheme: dark;
-    --bg: #04050c;
-    --panel: rgba(8, 12, 22, 0.92);
-    --text: #b9f3ff;
-    --muted: #7fa2b3;
-    --accent: #69ffea;
-    --focus: #ffd16f;
-    --error: #ff6b6b;
-    --ghost: #a58cff;
+    --bg: #050610;
+    --panel: rgba(8, 12, 24, 0.88);
+    --text: #c9f7ff;
+    --muted: #8d9fb3;
+    --accent: #75f0ff;
+    --warn: #ff7d83;
+    --prime: #ffdf7b;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: radial-gradient(circle at 50% 10%, rgba(77, 96, 163, 0.12), transparent 22%), #04050c; color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    pointer-events: none;
-    background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent 24%, transparent 72%, rgba(255,255,255,0.025));
-    z-index: 0;
-  }
-  canvas { position: absolute; inset: 0; display: block; z-index: 1; }
-  #panel { position: absolute; left: 18px; top: 18px; z-index: 2; width: min(360px, calc(100vw - 36px)); backdrop-filter: blur(14px); background: var(--panel); border: 1px solid rgba(105, 188, 255, 0.14); box-shadow: 0 0 42px rgba(0,0,0,0.3); padding: 18px 18px 14px; border-radius: 18px; }
-  .title { font-size: 0.95rem; letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 12px; opacity: 0.88; }
-  .row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
-  .label { color: var(--muted); font-variant: petite-caps; letter-spacing: 0.15em; font-size: 0.86rem; }
-  .value { text-align: right; font-size: 0.94rem; }
-  #log { position: absolute; left: 18px; bottom: 18px; z-index: 2; width: min(420px, calc(100vw - 36px)); max-height: 38vh; overflow: hidden; padding: 16px 18px 16px; border-radius: 18px; background: rgba(6, 10, 18, 0.82); border: 1px solid rgba(115, 223, 255, 0.12); backdrop-filter: blur(10px); font-size: 0.82rem; line-height: 1.5; }
-  .line { margin: 0 0 6px; opacity: 0.92; }
-  .hint { position: absolute; right: 18px; top: 18px; z-index: 2; padding: 12px 14px; border-radius: 14px; background: rgba(2, 6, 14, 0.76); border: 1px dashed rgba(115, 223, 255, 0.16); font-size: 0.82rem; color: var(--muted); width: min(260px, calc(100vw - 36px)); }
-  #hint strong { color: var(--accent); }
-  #start { position: absolute; inset: 0; display: grid; place-items: center; z-index: 5; pointer-events: none; font-size: 1.1rem; text-align: center; color: rgba(181, 236, 255, 0.92); }
-  #start span { padding: 18px 28px; background: rgba(8, 16, 28, 0.82); border: 1px solid rgba(114, 251, 236, 0.18); border-radius: 999px; box-shadow: 0 0 26px rgba(0,0,0,0.28); }
-  @media (max-width: 600px) { #panel, #log, #hint { left: 12px; right: auto; width: calc(100vw - 24px); } #hint { top: auto; bottom: 120px; } }
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: radial-gradient(circle at 50% 0%, rgba(112,172,255,0.1), transparent 18%), var(--bg); color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  body::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02) 1px, transparent 1px, transparent 17px); z-index: 0; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
+  #hud { position: absolute; top: 18px; left: 18px; right: 18px; z-index: 2; display: grid; gap: 10px; pointer-events: none; }
+  .box { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 16px 18px; border-radius: 18px; backdrop-filter: blur(14px); background: var(--panel); border: 1px solid rgba(116, 226, 255, 0.14); box-shadow: 0 0 36px rgba(0,0,0,0.24); }
+  .label { color: var(--muted); letter-spacing: 0.12em; font-variant: petite-caps; font-size: 0.82rem; }
+  .value { text-align: right; font-size: 0.95rem; }
+  #log { position: absolute; left: 18px; bottom: 18px; z-index: 2; width: min(440px, calc(100vw - 36px)); max-height: 38vh; overflow: hidden; padding: 16px 18px; border-radius: 18px; backdrop-filter: blur(12px); background: rgba(6, 10, 18, 0.86); border: 1px solid rgba(110, 220, 255, 0.13); box-shadow: 0 0 34px rgba(0,0,0,0.22); font-size: 0.82rem; line-height: 1.5; }
+  .log-line { margin: 0 0 8px; opacity: 0.92; }
+  #tip { position: absolute; right: 18px; bottom: 18px; z-index: 2; padding: 14px 16px; width: min(260px, calc(100vw - 36px)); border-radius: 16px; background: rgba(8,12,22,0.82); border: 1px dashed rgba(120,214,255,0.16); color: var(--muted); font-size: 0.82rem; }
+  #tip strong { color: var(--accent); }
+  #launch { position: absolute; inset: 0; display: grid; place-items: center; z-index: 5; pointer-events: none; font-size: 1.1rem; text-align: center; color: rgba(197, 247, 255, 0.94); }
+  #launch span { display: inline-block; padding: 18px 28px; border-radius: 999px; background: rgba(9, 14, 26, 0.86); border: 1px solid rgba(120, 225, 255, 0.16); box-shadow: 0 0 24px rgba(0,0,0,0.28); }
+  @media (max-width: 640px) { #hud { left: 12px; right: 12px; top: 12px; } #log { left: 12px; right: 12px; bottom: 12px; max-height: 34vh; } #tip { right: 12px; bottom: 110px; } }
 </style>
 </head>
 <body>
-<canvas id="screen"></canvas>
-<div id="panel">
-  <div class="title">ECHO GRID</div>
-  <div class="row"><span class="label">TUNE PHASE</span><span class="value" id="phaseValue">--</span></div>
-  <div class="row"><span class="label">STABILITY</span><span class="value" id="stabilityValue">--</span></div>
-  <div class="row"><span class="label">ENERGY</span><span class="value" id="energyValue">--</span></div>
-  <div class="row"><span class="label">ANOMALY</span><span class="value" id="anomalyValue">--</span></div>
-  <div class="row"><span class="label">TARGET</span><span class="value" id="targetValue">--</span></div>
-  <div class="row"><span class="label">OBJECTIVE</span><span class="value" id="objectiveValue">--</span></div>
+<canvas id="game"></canvas>
+<div id="hud">
+  <div class="box"><span class="label">WAVE</span><span class="value" id="waveValue">--</span></div>
+  <div class="box"><span class="label">HEALTH</span><span class="value" id="healthValue">--</span></div>
+  <div class="box"><span class="label">ENERGY</span><span class="value" id="energyValue">--</span></div>
+  <div class="box"><span class="label">ANOMALY</span><span class="value" id="anomalyValue">--</span></div>
+  <div class="box"><span class="label">SECRET</span><span class="value" id="secretValue">--</span></div>
 </div>
-<div id="hint"><strong>1-5</strong> phase buttons · <strong>arrows</strong> move · <strong>SPACE</strong> engage · <strong>Q</strong> inspect secret</div>
 <div id="log"></div>
-<div id="start"><span>Press any key or tap to synchronize the grid.</span></div>
+<div id="tip"><strong>WASD</strong> move · <strong>SPACE</strong> fire · <strong>Q</strong> scan · <strong>SHIFT</strong> overdrive</div>
+<div id="launch"><span>Press any key or tap to launch into the Neon Skies.</span></div>
 <script>
 (() => {
-  const canvas = document.getElementById('screen');
+  const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
+  const waveEl = document.getElementById('waveValue');
+  const healthEl = document.getElementById('healthValue');
+  const energyEl = document.getElementById('energyValue');
+  const anomalyEl = document.getElementById('anomalyValue');
+  const secretEl = document.getElementById('secretValue');
   const logEl = document.getElementById('log');
-  const startEl = document.getElementById('start');
-  const phaseValue = document.getElementById('phaseValue');
-  const stabilityValue = document.getElementById('stabilityValue');
-  const energyValue = document.getElementById('energyValue');
-  const anomalyValue = document.getElementById('anomalyValue');
-  const targetValue = document.getElementById('targetValue');
-  const objectiveValue = document.getElementById('objectiveValue');
+  const launchEl = document.getElementById('launch');
 
   let width = 0;
   let height = 0;
@@ -74,38 +63,33 @@
   const state = {
     started: false,
     time: 0,
-    last: 0,
-    cursor: { x: 0, y: 0 },
-    grid: [],
-    rows: 10,
-    cols: 10,
-    tileSize: 0,
-    offsetX: 0,
-    offsetY: 0,
-    phase: 2,
-    stability: 42,
-    energy: 82,
-    anomaly: 8,
-    target: 20,
-    activated: 0,
+    lastTime: 0,
+    keys: {},
+    player: { x: 0, y: 0, vx: 0, vy: 0, speed: 260, health: 100, energy: 100, overdrive: 0, radius: 12, cooldown: 0 },
+    bullets: [],
+    enemies: [],
+    beams: [],
+    anomalies: [],
+    particles: [],
+    wave: 1,
     score: 0,
-    scan: 0,
-    scanSpeed: 0.22,
-    stage: 0,
-    secretChain: [],
-    secretOpen: false,
-    hiddenNodes: 0,
+    anomaly: 0,
+    secrets: 0,
+    scan: false,
+    eventTimer: 0,
+    eventRate: 3.8,
+    glitch: 0,
+    flash: 0,
+    gameOver: false,
+    win: false,
+    secretMode: false,
+    hiddenReveal: 0,
     logs: [],
-    completed: false,
-    failed: false,
     audio: null,
     audioNodes: null,
-    beat: 0,
-    lastInspect: 0,
   };
 
-  const phaseNames = ['Void','Pulse','Glide','Ether','Rune','Echo'];
-  const phaseColors = ['#5b6a8c','#8ef3ff','#b085ff','#66ffcb','#ffcb6b','#ff9cbc'];
+  const themes = ['#79d9ff', '#ffb86c', '#b48df8', '#85ffb2', '#ffd47c'];
 
   function resize() {
     width = window.innerWidth;
@@ -116,37 +100,17 @@
     canvas.style.width = width + 'px';
     canvas.style.height = height + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    state.tileSize = Math.min(width, height) / 14;
-    state.offsetX = (width - state.tileSize * state.cols) / 2;
-    state.offsetY = (height - state.tileSize * state.rows) / 2;
+    state.player.x = width * 0.5;
+    state.player.y = height * 0.78;
   }
 
-  function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
-  function rnd(min,max){return Math.random()*(max-min)+min;}
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+  function px(n) { return `${Math.round(n)}px`; }
 
-  function buildGrid() {
-    state.grid = [];
-    for (let y = 0; y < state.rows; y++) {
-      for (let x = 0; x < state.cols; x++) {
-        const freq = 1 + Math.floor(Math.random() * 5);
-        const ghost = Math.random() < 0.12;
-        state.grid.push({ x, y, freq, engaged: false, charge: 0, ghost, discovered: !ghost, pulse: 0, hidden: ghost });
-      }
-    }
-    const anchor = state.grid[Math.floor(Math.random()*state.grid.length)];
-    anchor.freq = state.phase;
-    anchor.engaged = true;
-    anchor.discovered = true;
-    anchor.hidden = false;
-    state.activated = 1;
-  }
-
-  function tileAt(x,y){return state.grid.find(t=>t.x===x&&t.y===y);}
-  function index(x,y){return y*state.cols+x;}
-
-  function addLog(text, level=1) {
+  function addLog(text, level = 1) {
     state.logs.unshift({ text, time: state.time, level });
-    if (state.logs.length > 18) state.logs.pop();
+    if (state.logs.length > 16) state.logs.pop();
   }
 
   function initAudio() {
@@ -154,391 +118,454 @@
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
     const audio = new AudioContext();
-    const gain = audio.createGain();
-    gain.gain.value = 0.16;
-    gain.connect(audio.destination);
+    const mainGain = audio.createGain();
+    mainGain.gain.value = 0.16;
+    mainGain.connect(audio.destination);
 
     const drone = audio.createOscillator();
-    drone.type = 'sawtooth';
-    drone.frequency.value = 58;
+    drone.type = 'triangle';
+    drone.frequency.value = 52;
     const droneGain = audio.createGain();
-    droneGain.gain.value = 0.006;
+    droneGain.gain.value = 0.0045;
     drone.connect(droneGain);
-    droneGain.connect(gain);
+    droneGain.connect(mainGain);
     drone.start();
 
     const pulse = audio.createOscillator();
-    pulse.type = 'sine';
-    pulse.frequency.value = 120;
+    pulse.type = 'square';
+    pulse.frequency.value = 88;
     const pulseGain = audio.createGain();
     pulseGain.gain.value = 0;
     pulse.connect(pulseGain);
-    pulseGain.connect(gain);
+    pulseGain.connect(mainGain);
     pulse.start();
 
-    const noise = audio.createBufferSource();
-    const buf = audio.createBuffer(1, audio.sampleRate * 1.2, audio.sampleRate);
-    const data = buf.getChannelData(0);
+    const noiseBuf = audio.createBuffer(1, audio.sampleRate * 1.2, audio.sampleRate);
+    const data = noiseBuf.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.08;
-    noise.buffer = buf;
+    const noise = audio.createBufferSource();
+    noise.buffer = noiseBuf;
     noise.loop = true;
     const noiseGain = audio.createGain();
-    noiseGain.gain.value = 0.0018;
+    noiseGain.gain.value = 0.0022;
     noise.connect(noiseGain);
-    noiseGain.connect(gain);
+    noiseGain.connect(mainGain);
     noise.start();
 
     state.audio = audio;
-    state.audioNodes = { gain, pulseGain, droneGain };
+    state.audioNodes = { mainGain, pulseGain, droneGain, noiseGain };
   }
 
-  function pulseSound(strength=0.08,dur=0.08) {
+  function soundPulse(strength = 0.06, duration = 0.08) {
     if (!state.audioNodes) return;
-    const t = state.audio.currentTime;
-    const pg = state.audioNodes.pulseGain.gain;
-    pg.cancelScheduledValues(t);
-    pg.setValueAtTime(0, t);
-    pg.linearRampToValueAtTime(strength, t + 0.01);
-    pg.linearRampToValueAtTime(0, t + dur);
+    const now = state.audio.currentTime;
+    const gain = state.audioNodes.pulseGain.gain;
+    gain.cancelScheduledValues(now);
+    gain.setValueAtTime(0, now);
+    gain.linearRampToValueAtTime(strength, now + 0.01);
+    gain.linearRampToValueAtTime(0, now + duration);
   }
 
-  function setPhase(value) {
-    state.phase = clamp(value,1,5);
-    addLog(`[PHASE] tuning set to ${phaseNames[state.phase]} (${state.phase})`, 1);
-    pulseSound(0.12, 0.1);
+  function spawnEnemy(type) {
+    const x = rand(40, width - 40);
+    const y = -20;
+    const speed = rand(70, 120) + state.wave * 4;
+    const radius = type === 'drone' ? 10 : type === 'bomber' ? 18 : 7;
+    const health = type === 'bomber' ? 3 + state.wave * 0.5 : 1;
+    const color = type === 'drone' ? '#77d9ff' : type === 'bomber' ? '#ff9d6c' : '#ddff80';
+    state.enemies.push({ x, y, vx: rand(-20, 20), vy: speed, radius, health, type, color, timer: rand(0.5, 2), pattern: Math.random() });
   }
 
-  function inspectTile() {
-    if (state.failed || state.completed) return;
-    const tile = tileAt(state.cursor.x, state.cursor.y);
-    if (!tile) return;
-    state.lastInspect = state.time;
-    if (tile.hidden && !tile.discovered) {
-      tile.discovered = true;
-      tile.hidden = false;
-      addLog('[INSPECT] hidden node surfaced in the echo.', 2);
-      state.anomaly += 4;
-      state.hiddenNodes += 1;
-      if (state.hiddenNodes >= 3 && !state.secretOpen) {
-        state.secretOpen = true;
-        addLog('[SECRET] a deeper resonance has been exposed.', 3);
-        state.target += 4;
-      }
-      pulseSound(0.18, 0.14);
-      return;
+  function spawnAnomaly() {
+    const x = rand(40, width - 40);
+    const y = rand(60, height * 0.45);
+    state.anomalies.push({ x, y, r: 14, alpha: 0.08, reveal: 0, visible: false, pulse: 0, secret: Math.random() < 0.18 });
+  }
+
+  function fireBullet() {
+    if (state.player.cooldown > 0 || state.gameOver) return;
+    const speed = 420 + state.player.overdrive * 40;
+    const color = state.player.overdrive ? '#ffb274' : '#aef9ff';
+    state.bullets.push({ x: state.player.x, y: state.player.y - 18, vx: 0, vy: -speed, r: 4, color, life: 1.2 });
+    state.player.cooldown = 0.12;
+    soundPulse(0.1, 0.06);
+  }
+
+  function scanPulse() {
+    state.scan = true;
+    addLog('[SCAN] hidden echoes are being probed.', 1);
+    state.player.energy = clamp(state.player.energy - 6, 0, 100);
+    if (state.player.energy <= 0) addLog('[WARN] energy low. overdrive impossible.', 2);
+  }
+
+  function createParticles(x, y, count, color) {
+    for (let i = 0; i < count; i++) {
+      state.particles.push({ x, y, vx: rand(-120, 120), vy: rand(-120, 120), life: rand(0.4, 1.1), size: rand(1, 3), color });
     }
-    if (tile.engaged) {
-      addLog('[INSPECT] this node is actively tuning.', 1);
-      return;
-    }
-    addLog(`[INSPECT] frequency ${tile.freq} detected. align with phase ${state.phase}.`, 1);
   }
 
-  function toggleTile() {
-    if (state.failed || state.completed) return;
-    const tile = tileAt(state.cursor.x, state.cursor.y);
-    if (!tile || tile.hidden) return;
-    tile.engaged = !tile.engaged;
-    if (tile.engaged) {
-      addLog(`[ENGAGED] node ${tile.x},${tile.y} locked to phase ${state.phase}.`, 1);
-      if (tile.freq === state.phase) {
-        state.score += 12;
-      } else {
-        state.anomaly += 5;
-      }
-    } else {
-      addLog(`[RELEASE] node ${tile.x},${tile.y} released.`, 1);
+  function addSecret() {
+    state.secrets += 1;
+    addLog('[SECRET] deeper resonance detected in the grid.', 2);
+    if (state.secrets === 2) addLog('[SECRET] another layer of anomalies is now accessible.', 2);
+    if (state.secrets === 4) {
+      state.secretMode = true;
+      state.eventRate *= 0.78;
+      addLog('[SECRET] overdrive matrix unlocked. enemy patterns change.', 3);
     }
-    pulseSound(0.14, 0.12);
   }
 
-  function moveCursor(dx,dy) {
-    if (state.failed || state.completed) return;
-    state.cursor.x = clamp(state.cursor.x + dx, 0, state.cols - 1);
-    state.cursor.y = clamp(state.cursor.y + dy, 0, state.rows - 1);
-  }
+  function update(dt) {
+    if (!state.started || state.gameOver) return;
+    state.time += dt;
+    state.player.cooldown = clamp(state.player.cooldown - dt, 0, 1);
+    state.anomaly = clamp(state.anomaly + dt * 0.08, 0, 100);
 
-  function updateGrid(dt) {
-    state.scan += dt * state.scanSpeed;
-    if (state.scan > state.cols) {
-      state.scan -= state.cols;
-      state.stage += 1;
-      addLog('[SCAN] sweep complete. resonance patterns are shifting.', 1);
-      if (Math.random() < 0.18) state.anomaly += 2;
-      if (state.stage % 3 === 0) state.energy -= 3;
-      if (state.stage === 6) state.target += 2;
+    const dx = (state.keys.ArrowRight || state.keys.KeyD ? 1 : 0) - (state.keys.ArrowLeft || state.keys.KeyA ? 1 : 0);
+    const dy = (state.keys.ArrowDown || state.keys.KeyS ? 1 : 0) - (state.keys.ArrowUp || state.keys.KeyW ? 1 : 0);
+    const speed = state.player.speed * (state.keys.ShiftLeft || state.keys.ShiftRight ? 1.4 : 1);
+    state.player.vx = dx * speed;
+    state.player.vy = dy * speed;
+    state.player.x = clamp(state.player.x + state.player.vx * dt, 24, width - 24);
+    state.player.y = clamp(state.player.y + state.player.vy * dt, height * 0.5, height - 40);
+    if (state.keys.Space) fireBullet();
+    if (state.scan) {
+      state.anomalies.forEach(an => {
+        an.visible = true;
+        an.reveal = clamp(an.reveal + dt * 1.2, 0, 1);
+      });
+      state.scan = false;
+    }
+    if (state.keys.KeyQ && state.time - state.player.lastScan > 0.4) {
+      scanPulse();
+      state.player.lastScan = state.time;
     }
 
-    const lineX = Math.floor(state.scan);
-    state.grid.forEach(tile => {
-      if (!tile.engaged) {
-        if (tile.charge > 0) tile.charge = clamp(tile.charge - dt * 0.2, 0, 1);
-        return;
-      }
-      const match = tile.freq === state.phase;
-      const over = tile.freq !== state.phase;
-      const withinWave = Math.abs(tile.x - lineX) < 1;
-      if (withinWave) {
-        if (match) {
-          tile.charge = clamp(tile.charge + dt * 0.32, 0, 1);
-          state.stability = clamp(state.stability + dt * 0.9, 0, 100);
-          state.score += 1;
-        } else {
-          tile.charge = clamp(tile.charge + dt * 0.18, 0, 1);
-          state.anomaly = clamp(state.anomaly + dt * 1.8, 0, 120);
-          state.stability = clamp(state.stability - dt * 0.8, 0, 100);
-        }
-      }
-      if (tile.charge > 0.96 && match && !tile.settled) {
-        tile.settled = true;
-        state.activated += 1;
-        state.score += 22;
-        addLog('[RESOLVE] node stabilized by coherent phase alignment.', 2);
-      }
+    state.eventTimer += dt;
+    if (state.eventTimer > state.eventRate) {
+      state.eventTimer = 0;
+      state.wave += 1;
+      const count = clamp(2 + Math.floor(state.wave * 0.9), 3, 12);
+      for (let i = 0; i < count; i++) spawnEnemy(state.wave % 4 === 0 ? 'bomber' : 'drone');
+      if (Math.random() < 0.48) spawnAnomaly();
+      if (state.wave % 5 === 0) addLog(`[WAVE] ${state.wave} incoming. the sky trembles.`, 2);
+      state.eventRate = clamp(3.2 - state.wave * 0.08, 1.4, 3.8);
+    }
+
+    state.bullets = state.bullets.filter(b => {
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
+      b.life -= dt;
+      return b.life > 0 && b.y > -20;
     });
 
-    if (state.energy > 0) state.energy = clamp(state.energy - dt * 0.14, 0, 100);
-    if (state.anomaly > 0 && state.anomaly < 100 && state.energy < 28) state.anomaly = clamp(state.anomaly + dt * 0.7, 0, 120);
-    if (state.stability < 20) state.anomaly = clamp(state.anomaly + dt * 0.5, 0, 120);
+    state.enemies = state.enemies.filter(e => {
+      e.y += e.vy * dt;
+      e.x += e.vx * dt;
+      e.vx += Math.sin(state.time + e.pattern) * 2 * dt;
+      if (e.x < 20 || e.x > width - 20) e.vx *= -1;
+      e.timer -= dt;
+      if (e.timer <= 0) {
+        e.timer = rand(1.2, 2.4);
+        if (Math.random() < 0.42) state.beams.push({ x: e.x, y: e.y + e.radius + 6, vx: rand(-10, 10), vy: 220 + state.wave * 6, r: 3, color: '#ff724d' });
+      }
+      return e.y < height + 40;
+    });
 
-    if (!state.completed && !state.failed) {
-      if (state.energy <= 0) {
-        state.failed = true;
-        addLog('[FAIL] power drains. the echo collapses into static.', 3);
+    state.beams = state.beams.filter(b => {
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
+      return b.y < height + 20;
+    });
+
+    state.particles = state.particles.filter(p => {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.life -= dt;
+      return p.life > 0;
+    });
+
+    collideBullets();
+    collideBeams();
+    updateAnomalies(dt);
+    updateOverdrive(dt);
+    updatePlayer(dt);
+    updateGlitch(dt);
+    if (state.player.health <= 0 || state.anomaly >= 100) gameOver();
+  }
+
+  function collideBullets() {
+    state.bullets.forEach(b => {
+      state.enemies.forEach(e => {
+        if (Math.hypot(b.x - e.x, b.y - e.y) < b.r + e.radius) {
+          b.life = 0;
+          e.health -= 1;
+          state.score += 8;
+          state.flash = 0.18;
+          createParticles(e.x, e.y, 6, '#a6f3ff');
+          if (e.health <= 0) {
+            state.enemies = state.enemies.filter(enemy => enemy !== e);
+            state.score += 18;
+            addLog('[HIT] enemy destroyed. resonance increased.', 1);
+            createParticles(e.x, e.y, 16, '#ff7d6c');
+          }
+        }
+      });
+      state.anomalies.forEach(an => {
+        if (!an.visible) return;
+        if (Math.hypot(b.x - an.x, b.y - an.y) < b.r + an.r) {
+          b.life = 0;
+          an.pulse = 1;
+          an.reveal = 1;
+          if (!an.visible) return;
+          if (an.secret && !an.hidden) {
+            an.hidden = true;
+            an.visible = false;
+            addSecret();
+          } else {
+            addLog('[HIT] anomaly disrupted. watch the next wave.', 1);
+          }
+          state.score += an.secret ? 40 : 14;
+          createParticles(an.x, an.y, 10, '#ddff9f');
+        }
+      });
+    });
+  }
+
+  function collideBeams() {
+    state.beams.forEach(b => {
+      if (Math.hypot(b.x - state.player.x, b.y - state.player.y) < b.r + state.player.radius) {
+        b.vy = 0;
+        b.life = 0;
+        state.player.health = clamp(state.player.health - 9 - state.wave * 0.18, 0, 100);
+        state.flash = 0.26;
+        addLog('[DAMAGE] hull compromised. evade faster.', 2);
+        createParticles(state.player.x, state.player.y, 10, '#ff9494');
       }
-      if (state.anomaly >= 100) {
-        state.failed = true;
-        addLog('[FAIL] anomaly saturated. the grid repels your touch.', 3);
-      }
-      if (state.activated >= state.target) {
-        state.completed = true;
-        addLog('[SUCCESS] resonance threshold met. hidden frequencies hum softly.', 3);
-      }
+    });
+  }
+
+  function updateAnomalies(dt) {
+    state.anomalies = state.anomalies.filter(an => {
+      an.pulse = clamp(an.pulse - dt * 1.2, 0, 1);
+      if (!an.visible && Math.random() < 0.002) an.visible = true;
+      an.alpha = an.visible ? clamp(an.alpha + dt * 0.5, 0.1, 0.32) : clamp(an.alpha - dt * 0.5, 0, 0.08);
+      return an.hidden === false || an.visible || an.pulse > 0;
+    });
+  }
+
+  function updateOverdrive(dt) {
+    if (state.keys.ShiftLeft || state.keys.ShiftRight) {
+      state.player.overdrive = clamp(state.player.overdrive + dt * 0.9, 0, 1);
+      state.player.energy = clamp(state.player.energy - dt * 18, 0, 100);
+    } else {
+      state.player.overdrive = clamp(state.player.overdrive - dt * 0.8, 0, 1);
     }
+    if (state.player.energy < 25) state.anomaly = clamp(state.anomaly + dt * 0.5, 0, 100);
+  }
+
+  function updatePlayer(dt) {
+    if (state.player.health < 100 && state.player.energy > 48 && !state.keys.Space) {
+      state.player.health = clamp(state.player.health + dt * 4, 0, 100);
+    }
+    if (!state.player.cooldown && state.keys.Space) fireBullet();
+  }
+
+  function updateGlitch(dt) {
+    state.glitch = clamp(state.glitch - dt * 0.8, 0, 1);
+    state.flash = clamp(state.flash - dt * 1.2, 0, 0.5);
+  }
+
+  function gameOver() {
+    if (state.gameOver) return;
+    state.gameOver = true;
+    if (state.player.health <= 0) addLog('[END] you were consumed by the skies.', 3);
+    else if (state.anomaly >= 100) addLog('[END] anomaly breached the hull. the mission ends.', 3);
+    else addLog('[END] mission complete.', 3);
   }
 
   function draw() {
-    ctx.clearRect(0,0,width,height);
+    ctx.clearRect(0, 0, width, height);
     drawBackground();
     drawGrid();
-    drawCursor();
-    drawScan();
-    drawOverlay();
-    renderHud();
+    drawEntities();
+    drawUI();
+    drawEffects();
     renderLogs();
+    if (!state.started) drawLaunch();
   }
 
   function drawBackground() {
-    const grad = ctx.createRadialGradient(width*0.5, height*0.3, 0, width*0.5, height*0.3, height*0.9);
-    grad.addColorStop(0, 'rgba(50, 86, 133, 0.16)');
-    grad.addColorStop(1, '#04050c');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0,0,width,height);
-    for (let i = 0; i < 12; i++) {
-      const alpha = 0.02 + Math.sin(state.time*0.8 + i) * 0.01;
-      ctx.strokeStyle = `rgba(116, 208, 255, ${alpha})`;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(width/2, height/2, 120 + i*42, 0, Math.PI*2);
-      ctx.stroke();
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+    bgGrad.addColorStop(0, '#09101e');
+    bgGrad.addColorStop(1, '#04060b');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, width, height);
+    for (let i = 0; i < 90; i++) {
+      const x = (i * 47 + (state.time * 34)) % width;
+      const y = (i * 127) % height;
+      ctx.fillStyle = `rgba(120, 204, 255, ${0.04 + Math.sin(state.time + i) * 0.01})`;
+      ctx.fillRect(x, y, 2, 2);
     }
   }
 
   function drawGrid() {
-    state.grid.forEach(tile => {
-      const x = state.offsetX + tile.x * state.tileSize;
-      const y = state.offsetY + tile.y * state.tileSize;
-      const s = state.tileSize * 0.92;
-      const cx = x + state.tileSize * 0.5;
-      const cy = y + state.tileSize * 0.5;
-      const radius = s * 0.42;
+    const spacing = 28;
+    ctx.strokeStyle = 'rgba(107, 164, 214, 0.08)';
+    ctx.lineWidth = 1;
+    for (let x = spacing; x < width; x += spacing) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+    }
+    for (let y = spacing; y < height; y += spacing) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+    }
+  }
 
-      const base = tile.hidden && !tile.discovered ? 'rgba(90, 100, 140, 0.18)' : `rgba(${28 + tile.freq*35}, ${84 + tile.freq*30}, ${172 - tile.freq*18}, 0.18)`;
-      ctx.fillStyle = base;
-      ctx.beginPath();
-      ctx.roundRect(x + state.tileSize*0.04, y + state.tileSize*0.04, s, s, 14);
-      ctx.fill();
-
-      if (tile.hidden && !tile.discovered) {
-        ctx.strokeStyle = 'rgba(180, 200, 255, 0.08)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        return;
-      }
-
-      ctx.strokeStyle = tile.engaged ? `rgba(255,255,255,0.8)` : 'rgba(120, 190, 255, 0.16)';
-      ctx.lineWidth = tile.engaged ? 2.4 : 1.2;
-      ctx.beginPath();
-      ctx.roundRect(x + state.tileSize*0.06, y + state.tileSize*0.06, s*0.88, s*0.88, 12);
-      ctx.stroke();
-
-      const fillColor = tile.engaged ? `rgba(${22 + tile.freq*43}, ${180 - tile.freq*20}, ${255 - tile.freq*30}, 0.95)` : `rgba(255,255,255,0.14)`;
-      ctx.fillStyle = fillColor;
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius, 0, Math.PI*2);
-      ctx.fill();
-
-      ctx.fillStyle = tile.engaged ? '#04050c' : '#b5f1ff';
-      ctx.font = `${Math.round(state.tileSize*0.28)}px ui-monospace, monospace`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(tile.freq, cx, cy);
-
-      if (tile.charge > 0.03) {
-        ctx.strokeStyle = `rgba(255,255,255,${0.12 + tile.charge * 0.28})`;
-        ctx.lineWidth = 2.2;
-        ctx.beginPath();
-        ctx.arc(cx, cy, radius + 12, 0, Math.PI*2 * tile.charge);
-        ctx.stroke();
-      }
-      if (tile.settled) {
-        ctx.strokeStyle = 'rgba(255, 224, 145, 0.65)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(cx, cy, radius + 18, 0, Math.PI*2);
-        ctx.stroke();
+  function drawEntities() {
+    state.anomalies.forEach(an => {
+      if (an.visible || an.pulse > 0) {
+        const glow = an.pulse * 0.34 + 0.08;
+        ctx.fillStyle = `rgba(255, 238, 108, ${an.alpha + glow})`;
+        ctx.beginPath(); ctx.arc(an.x, an.y, an.r + 4 * an.reveal, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.22 + glow * 0.4})`;
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(an.x, an.y, an.r + 8 * an.reveal, 0, Math.PI * 2); ctx.stroke();
+        if (an.secret && an.visible) {
+          ctx.fillStyle = 'rgba(255, 113, 180, 0.24)';
+          ctx.beginPath(); ctx.arc(an.x, an.y, an.r + 16, 0, Math.PI*2); ctx.fill();
+        }
       }
     });
-  }
-
-  function drawCursor() {
-    const x = state.offsetX + state.cursor.x * state.tileSize;
-    const y = state.offsetY + state.cursor.y * state.tileSize;
-    const s = state.tileSize * 0.96;
-    ctx.strokeStyle = 'rgba(189, 255, 255, 0.96)';
-    ctx.lineWidth = 2.6;
-    ctx.beginPath();
-    ctx.roundRect(x + state.tileSize*0.02, y + state.tileSize*0.02, s, s, 16);
-    ctx.stroke();
-
-    ctx.fillStyle = 'rgba(105, 235, 255, 0.06)';
-    ctx.fillRect(x + state.tileSize*0.02, y + state.tileSize*0.02, s, s);
-  }
-
-  function drawScan() {
-    const sweep = (state.scan / state.cols) * (state.tileSize * state.cols);
-    ctx.fillStyle = 'rgba(120, 232, 255, 0.06)';
-    ctx.fillRect(state.offsetX + sweep, state.offsetY, 22, state.tileSize * state.rows);
-    ctx.fillStyle = 'rgba(120, 232, 255, 0.14)';
-    ctx.fillRect(state.offsetX + sweep + 22, state.offsetY, 6, state.tileSize * state.rows);
-  }
-
-  function drawOverlay() {
-    if (state.failed) {
-      ctx.fillStyle = 'rgba(4, 8, 18, 0.62)';
-      ctx.fillRect(0,0,width,height);
-      ctx.fillStyle = 'rgba(255,110,110,0.92)';
-      ctx.font = '38px ui-monospace, monospace';
+    state.enemies.forEach(e => {
+      ctx.fillStyle = e.color;
+      ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.arc(e.x, e.y, e.radius + 4, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#04060b';
+      ctx.font = '10px ui-monospace, monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('GRID FRACTURED', width/2, height/2);
-    }
-    if (state.completed) {
-      ctx.fillStyle = 'rgba(2, 8, 14, 0.68)';
-      ctx.fillRect(0,0,width,height);
-      ctx.fillStyle = 'rgba(159, 255, 222, 0.94)';
-      ctx.font = '38px ui-monospace, monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('RESIDUE SYNCHRONIZED', width/2, height/2);
-    }
+      ctx.fillText(e.health, e.x, e.y);
+    });
+    state.bullets.forEach(b => {
+      ctx.fillStyle = b.color;
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill();
+    });
+    state.beams.forEach(b => {
+      ctx.fillStyle = b.color;
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill();
+    });
+    state.particles.forEach(p => {
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = clamp(p.life, 0, 1);
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+    });
+    drawPlayer();
   }
 
-  function renderHud() {
-    phaseValue.textContent = `${phaseNames[state.phase]} (${state.phase})`;
-    stabilityValue.textContent = `${Math.round(state.stability)}%`;
-    energyValue.textContent = `${Math.round(state.energy)}%`;
-    anomalyValue.textContent = `${Math.round(state.anomaly)}%`;
-    targetValue.textContent = `${state.activated}/${state.target}`;
-    objectiveValue.textContent = state.failed ? 'COLLAPSE' : state.completed ? 'HARMONY' : 'align nodes to the current phase';
+  function drawPlayer() {
+    const px = state.player.x;
+    const py = state.player.y;
+    const trail = state.player.overdrive * 0.7;
+    ctx.fillStyle = `rgba(133, 238, 255, ${0.18 + trail * 0.4})`;
+    ctx.beginPath(); ctx.arc(px, py + 6, 22 + trail * 8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#a9f7ff';
+    ctx.beginPath(); ctx.moveTo(px, py - 18); ctx.lineTo(px - 16, py + 16); ctx.lineTo(px + 16, py + 16); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(px, py - 18); ctx.lineTo(px - 16, py + 16); ctx.lineTo(px + 16, py + 16); ctx.closePath(); ctx.stroke();
+  }
+
+  function drawUI() {
+    waveEl.textContent = state.wave;
+    healthEl.textContent = `${Math.round(state.player.health)}%`;
+    energyEl.textContent = `${Math.round(state.player.energy)}%`;
+    anomalyEl.textContent = `${Math.round(state.anomaly)}%`;
+    secretEl.textContent = state.secretMode ? 'ACTIVE' : state.secrets ? `${state.secrets}` : 'NONE';
   }
 
   function renderLogs() {
     logEl.innerHTML = '';
-    state.logs.forEach(entry => {
-      const age = state.time - entry.time;
-      const opacity = clamp(1 - age / 16, 0, 1);
+    state.logs.forEach(log => {
+      const age = state.time - log.time;
       const line = document.createElement('div');
-      line.className = 'line';
-      line.textContent = entry.text;
-      line.style.opacity = opacity;
-      if (entry.level > 1) line.style.color = 'rgba(255, 176, 95, 0.96)';
-      if (entry.level > 2) line.style.color = 'rgba(255, 165, 165, 0.96)';
+      line.className = 'log-line';
+      line.textContent = log.text;
+      line.style.opacity = clamp(1 - age / 14, 0, 1);
+      if (log.level > 1) line.style.color = '#ffd186';
+      if (log.level > 2) line.style.color = '#ff9db2';
       logEl.appendChild(line);
     });
   }
 
+  function drawEffects() {
+    if (state.flash > 0) {
+      ctx.fillStyle = `rgba(255,255,255,${state.flash})`;
+      ctx.fillRect(0, 0, width, height);
+    }
+    if (state.secretMode) {
+      ctx.strokeStyle = 'rgba(255, 153, 208, 0.12)';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([14, 9]);
+      ctx.strokeRect(6, 6, width - 12, height - 12);
+      ctx.setLineDash([]);
+    }
+    if (state.gameOver) {
+      ctx.fillStyle = 'rgba(4, 6, 15, 0.72)';
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '36px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(state.player.health <= 0 ? 'YOU CRASHED' : 'ANOMALY OVERLOAD', width / 2, height / 2 - 20);
+      ctx.font = '16px ui-monospace, monospace';
+      ctx.fillText('Refresh to try again.', width / 2, height / 2 + 24);
+    }
+  }
+
+  function drawLaunch() {
+    ctx.fillStyle = 'rgba(4, 8, 16, 0.72)';
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  function start() {
+    resize();
+    state.player.x = width / 2;
+    state.player.y = height * 0.78;
+    addLog('[SYSTEM] booting neon flight. prepare for waves.', 1);
+    addLog('[TIP] Q scans hidden anomalies. shift for a burst.', 1);
+    requestAnimationFrame(loop);
+  }
+
   function loop(timestamp) {
-    if (!state.last) state.last = timestamp;
-    const dt = Math.min(0.033, (timestamp - state.last) / 1000);
-    state.last = timestamp;
-    if (state.started) updateGrid(dt);
-    state.time += dt;
+    if (!state.lastTime) state.lastTime = timestamp;
+    const dt = Math.min(0.033, (timestamp - state.lastTime) / 1000);
+    state.lastTime = timestamp;
+    update(dt);
     draw();
     requestAnimationFrame(loop);
   }
 
-  function startGame() {
-    state.started = true;
-    startEl.style.display = 'none';
-    initAudio();
-    addLog('[SYSTEM] echo grid activated. tune carefully.', 1);
+  function keyHandler(e, down) {
+    if (!state.started) {
+      state.started = true;
+      launchEl.style.display = 'none';
+      initAudio();
+    }
+    state.keys[e.code] = down;
+    if (down && e.code === 'KeyQ') scanPulse();
+    if (down && e.code === 'Space') fireBullet();
   }
 
-  function initInput() {
-    window.addEventListener('keydown', e => {
-      if (!state.started) startGame();
-      if (e.code === 'ArrowUp') moveCursor(0,-1);
-      if (e.code === 'ArrowDown') moveCursor(0,1);
-      if (e.code === 'ArrowLeft') moveCursor(-1,0);
-      if (e.code === 'ArrowRight') moveCursor(1,0);
-      if (e.code === 'Space') toggleTile();
-      if (e.code === 'KeyQ') inspectTile();
-      if (e.code === 'Digit1') setPhase(1);
-      if (e.code === 'Digit2') setPhase(2);
-      if (e.code === 'Digit3') setPhase(3);
-      if (e.code === 'Digit4') setPhase(4);
-      if (e.code === 'Digit5') setPhase(5);
-      if (e.code === 'KeyR' && !state.failed && !state.completed) {
-        state.energy = clamp(state.energy + 12, 0, 100);
-        addLog('[RECHARGE] energy injected into the lattice.', 1);
-        pulseSound(0.18, 0.16);
-      }
-    });
-    canvas.addEventListener('mousedown', e => {
-      if (!state.started) startGame();
-      const rect = canvas.getBoundingClientRect();
-      const mx = (e.clientX - rect.left);
-      const my = (e.clientY - rect.top);
-      const x = Math.floor((mx - state.offsetX) / state.tileSize);
-      const y = Math.floor((my - state.offsetY) / state.tileSize);
-      if (x >= 0 && x < state.cols && y >= 0 && y < state.rows) {
-        state.cursor.x = x;
-        state.cursor.y = y;
-        toggleTile();
-      }
-    });
-    canvas.addEventListener('touchstart', e => {
-      if (!state.started) startGame();
-      const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      const mx = (touch.clientX - rect.left);
-      const my = (touch.clientY - rect.top);
-      const x = Math.floor((mx - state.offsetX) / state.tileSize);
-      const y = Math.floor((my - state.offsetY) / state.tileSize);
-      if (x >= 0 && x < state.cols && y >= 0 && y < state.rows) {
-        state.cursor.x = x;
-        state.cursor.y = y;
-        toggleTile();
-      }
-    }, { passive: false });
-  }
-
-  resize();
-  buildGrid();
-  initInput();
-  requestAnimationFrame(loop);
+  window.addEventListener('keydown', e => { keyHandler(e, true); if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','KeyQ'].includes(e.code)) e.preventDefault(); });
+  window.addEventListener('keyup', e => keyHandler(e, false));
+  window.addEventListener('mousedown', e => { if (!state.started) { state.started = true; launchEl.style.display = 'none'; initAudio(); } fireBullet(); });
+  window.addEventListener('touchstart', e => { if (!state.started) { state.started = true; launchEl.style.display = 'none'; initAudio(); } fireBullet(); }, { passive: true });
   window.addEventListener('resize', resize);
+
+  start();
 })();
 </script>
 </body>
