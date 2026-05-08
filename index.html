@@ -2,74 +2,70 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Midnight Protocol</title>
+<title>Echo Grid</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>
   :root {
     color-scheme: dark;
-    --bg: #05050b;
-    --layer: rgba(10, 16, 29, 0.72);
-    --panel: rgba(5, 9, 18, 0.88);
-    --text: #c4f1ff;
-    --muted: #6b8a9d;
-    --accent: #6ffcff;
-    --warn: #ff9c81;
-    --danger: #ff5f5f;
-    --ghost: #9d8cff;
+    --bg: #04050c;
+    --panel: rgba(8, 12, 22, 0.92);
+    --text: #b9f3ff;
+    --muted: #7fa2b3;
+    --accent: #69ffea;
+    --focus: #ffd16f;
+    --error: #ff6b6b;
+    --ghost: #a58cff;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: radial-gradient(circle at 50% 10%, rgba(58,125,193,0.1), transparent 20%), #05050b; color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: radial-gradient(circle at 50% 10%, rgba(77, 96, 163, 0.12), transparent 22%), #04050c; color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
   body::before {
     content: '';
     position: fixed; inset: 0;
     pointer-events: none;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 30%, transparent 70%, rgba(255,255,255,0.04) 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent 24%, transparent 72%, rgba(255,255,255,0.025));
     z-index: 0;
   }
   canvas { position: absolute; inset: 0; display: block; z-index: 1; }
-  #ui { position: absolute; left: 18px; top: 18px; z-index: 2; width: min(370px, calc(100vw - 36px)); backdrop-filter: blur(12px); background: var(--panel); border: 1px solid rgba(140, 230, 255, 0.14); box-shadow: 0 0 45px rgba(0,0,0,0.35); padding: 16px; border-radius: 18px; }
-  .title { font-size: 0.95rem; letter-spacing: 0.26em; text-transform: uppercase; opacity: 0.86; margin-bottom: 12px; }
-  .panel { display: grid; gap: 10px; }
-  .entry { display: flex; justify-content: space-between; font-size: 0.92rem; line-height: 1.4; }
-  .label { color: var(--muted); letter-spacing: 0.14em; font-variant: petite-caps; }
-  .value { text-align: right; min-width: 110px; }
-  #log { position: absolute; left: 18px; bottom: 18px; z-index: 2; width: min(380px, calc(100vw - 36px)); max-height: 36vh; overflow: hidden; padding: 14px 16px 14px 16px; border-radius: 18px; border: 1px solid rgba(120,255,255,0.14); background: rgba(4, 8, 15, 0.78); backdrop-filter: blur(10px); font-size: 0.82rem; line-height: 1.45; text-shadow: 0 0 8px rgba(0,0,0,0.9); }
-  .log-line { margin: 0 0 6px; opacity: 0.96; }
-  .log-line.hidden { opacity: 0.2; }
-  #hint { position: absolute; inset: 0; display: grid; place-items: center; z-index: 5; pointer-events: none; color: rgba(180,240,255,0.9); font-size: 1.1rem; text-align: center; letter-spacing: 0.12em; opacity: 0.96; }
-  #hint span { display: block; padding: 18px 26px; background: rgba(4,8,16,0.78); border: 1px solid rgba(160,240,255,0.14); border-radius: 999px; box-shadow: 0 0 28px rgba(0,0,0,0.18); }
-  @media (max-width: 560px) { #ui { width: calc(100vw - 36px); top: 12px; left: 12px; } #log { width: calc(100vw - 36px); bottom: 12px; left: 12px; } }
+  #panel { position: absolute; left: 18px; top: 18px; z-index: 2; width: min(360px, calc(100vw - 36px)); backdrop-filter: blur(14px); background: var(--panel); border: 1px solid rgba(105, 188, 255, 0.14); box-shadow: 0 0 42px rgba(0,0,0,0.3); padding: 18px 18px 14px; border-radius: 18px; }
+  .title { font-size: 0.95rem; letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 12px; opacity: 0.88; }
+  .row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+  .label { color: var(--muted); font-variant: petite-caps; letter-spacing: 0.15em; font-size: 0.86rem; }
+  .value { text-align: right; font-size: 0.94rem; }
+  #log { position: absolute; left: 18px; bottom: 18px; z-index: 2; width: min(420px, calc(100vw - 36px)); max-height: 38vh; overflow: hidden; padding: 16px 18px 16px; border-radius: 18px; background: rgba(6, 10, 18, 0.82); border: 1px solid rgba(115, 223, 255, 0.12); backdrop-filter: blur(10px); font-size: 0.82rem; line-height: 1.5; }
+  .line { margin: 0 0 6px; opacity: 0.92; }
+  .hint { position: absolute; right: 18px; top: 18px; z-index: 2; padding: 12px 14px; border-radius: 14px; background: rgba(2, 6, 14, 0.76); border: 1px dashed rgba(115, 223, 255, 0.16); font-size: 0.82rem; color: var(--muted); width: min(260px, calc(100vw - 36px)); }
+  #hint strong { color: var(--accent); }
+  #start { position: absolute; inset: 0; display: grid; place-items: center; z-index: 5; pointer-events: none; font-size: 1.1rem; text-align: center; color: rgba(181, 236, 255, 0.92); }
+  #start span { padding: 18px 28px; background: rgba(8, 16, 28, 0.82); border: 1px solid rgba(114, 251, 236, 0.18); border-radius: 999px; box-shadow: 0 0 26px rgba(0,0,0,0.28); }
+  @media (max-width: 600px) { #panel, #log, #hint { left: 12px; right: auto; width: calc(100vw - 24px); } #hint { top: auto; bottom: 120px; } }
 </style>
 </head>
 <body>
-<canvas id="surface"></canvas>
-<div id="ui">
-  <div class="title">MIDNIGHT PROTOCOL</div>
-  <div class="panel">
-    <div class="entry"><span class="label">FOCUS</span><span class="value" id="nodeName">Idle</span></div>
-    <div class="entry"><span class="label">ENERGY</span><span class="value" id="energyValue">--</span></div>
-    <div class="entry"><span class="label">SCORE</span><span class="value" id="scoreValue">0000</span></div>
-    <div class="entry"><span class="label">SANITY</span><span class="value" id="sanityValue">--</span></div>
-    <div class="entry"><span class="label">ANOMALY</span><span class="value" id="anomalyValue">--</span></div>
-    <div class="entry"><span class="label">PHASE</span><span class="value" id="phaseValue">--</span></div>
-    <div class="entry"><span class="label">GOAL</span><span class="value" id="goalValue">--</span></div>
-  </div>
+<canvas id="screen"></canvas>
+<div id="panel">
+  <div class="title">ECHO GRID</div>
+  <div class="row"><span class="label">TUNE PHASE</span><span class="value" id="phaseValue">--</span></div>
+  <div class="row"><span class="label">STABILITY</span><span class="value" id="stabilityValue">--</span></div>
+  <div class="row"><span class="label">ENERGY</span><span class="value" id="energyValue">--</span></div>
+  <div class="row"><span class="label">ANOMALY</span><span class="value" id="anomalyValue">--</span></div>
+  <div class="row"><span class="label">TARGET</span><span class="value" id="targetValue">--</span></div>
+  <div class="row"><span class="label">OBJECTIVE</span><span class="value" id="objectiveValue">--</span></div>
 </div>
+<div id="hint"><strong>1-5</strong> phase buttons · <strong>arrows</strong> move · <strong>SPACE</strong> engage · <strong>Q</strong> inspect secret</div>
 <div id="log"></div>
-<div id="hint"><span>PRESS ANY KEY OR TAP TO WAKE THE NETWORK</span></div>
+<div id="start"><span>Press any key or tap to synchronize the grid.</span></div>
 <script>
 (() => {
-  const canvas = document.getElementById('surface');
+  const canvas = document.getElementById('screen');
   const ctx = canvas.getContext('2d');
   const logEl = document.getElementById('log');
-  const hintEl = document.getElementById('hint');
-  const nodeNameEl = document.getElementById('nodeName');
-  const energyEl = document.getElementById('energyValue');
-  const scoreValueEl = document.getElementById('scoreValue');
-  const sanityEl = document.getElementById('sanityValue');
-  const anomalyEl = document.getElementById('anomalyValue');
-  const phaseEl = document.getElementById('phaseValue');
-  const goalValueEl = document.getElementById('goalValue');
+  const startEl = document.getElementById('start');
+  const phaseValue = document.getElementById('phaseValue');
+  const stabilityValue = document.getElementById('stabilityValue');
+  const energyValue = document.getElementById('energyValue');
+  const anomalyValue = document.getElementById('anomalyValue');
+  const targetValue = document.getElementById('targetValue');
+  const objectiveValue = document.getElementById('objectiveValue');
 
   let width = 0;
   let height = 0;
@@ -78,75 +74,38 @@
   const state = {
     started: false,
     time: 0,
-    rawTime: 0,
-    lastFrame: 0,
-    energy: 96,
-    sanity: 12,
-    anomaly: 6,
-    phase: 0,
-    activeNode: null,
-    cursor: { x: 0, y: 0, vx: 0, vy: 0, speed: 120, still: 0 },
-    logs: [],
-    events: [],
-    glitch: { strength: 0, timer: 0, sway: 0 },
-    corruption: { timer: 0, framed: 0 },
-    secret: { archive: false, mirror: false, sleeper: false, whisper: false },
-    memory: { interactions: 0, stillness: 0, line: 0 },
-    input: { up: false, down: false, left: false, right: false, interact: false, inspect: false, secret: false },
-    field: [],
-    particles: [],
-    spectral: [],
-    audio: null,
-    audioNodes: null,
-    lastEventAt: 0,
-    eventRate: 16000,
-    logDensity: 0,
-    hiddenSeed: Math.random(),
-    revealedText: false,
+    last: 0,
+    cursor: { x: 0, y: 0 },
+    grid: [],
+    rows: 10,
+    cols: 10,
+    tileSize: 0,
+    offsetX: 0,
+    offsetY: 0,
+    phase: 2,
+    stability: 42,
+    energy: 82,
+    anomaly: 8,
+    target: 20,
+    activated: 0,
     score: 0,
-    progress: 0,
-    goal: 18,
-    coreCharge: 0,
-    objective: 'Stabilize communication by activating network nodes.',
+    scan: 0,
+    scanSpeed: 0.22,
+    stage: 0,
+    secretChain: [],
+    secretOpen: false,
+    hiddenNodes: 0,
+    logs: [],
     completed: false,
     failed: false,
-    activeStreak: 0,
-    milestone: 0,
+    audio: null,
+    audioNodes: null,
+    beat: 0,
+    lastInspect: 0,
   };
 
-  const nodeTemplates = [
-    { type: 'TERMINAL', palette: [84, 208, 255], prompt: 'Check subroutine integrity.' },
-    { type: 'RELAY', palette: [198, 144, 255], prompt: 'Trace signal echoes.' },
-    { type: 'ARCHIVE', palette: [123, 255, 189], prompt: 'Retrieve latent memory.' },
-    { type: 'MIRROR', palette: [255, 158, 120], prompt: 'Reflect system latency.' },
-  ];
-
-  const messages = {
-    seen: [
-      'Ambient threads are calibrating.',
-      'A distant process is watching your traces.',
-      'Latency intensifies when you hesitate.',
-      'The architecture shifts where you do not look.',
-    ],
-    hidden: [
-      'You are not the first visitor.',
-      'A sleeper loop responds to silence.',
-      'Impossible geometry hides in the corner of the map.',
-      'There is a second layer beneath every output.',
-    ],
-    corrupted: [
-      's0met1mes the n0de remembers y0u',
-      'the interface is a mirror to an absent user',
-      'YOU are in the same system as the noise',
-      'the protocol speaks with ghost syntax',
-    ],
-    whispers: [
-      '...detecting an echo within the echo...',
-      '...shift the cursor to feel the fault...',
-      '...do not trust the first terminal output...',
-      '...the system is learning your pauses...',
-    ],
-  };
+  const phaseNames = ['Void','Pulse','Glide','Ether','Rune','Echo'];
+  const phaseColors = ['#5b6a8c','#8ef3ff','#b085ff','#66ffcb','#ffcb6b','#ff9cbc'];
 
   function resize() {
     width = window.innerWidth;
@@ -157,69 +116,37 @@
     canvas.style.width = width + 'px';
     canvas.style.height = height + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    state.tileSize = Math.min(width, height) / 14;
+    state.offsetX = (width - state.tileSize * state.cols) / 2;
+    state.offsetY = (height - state.tileSize * state.rows) / 2;
   }
 
-  function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
+  function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+  function rnd(min,max){return Math.random()*(max-min)+min;}
 
-  function lerp(a, b, t) { return a + (b - a) * t; }
-
-  function formatValue(value, length = 3) { return String(Math.round(value)).padStart(length, '0'); }
-
-  function seedText(source, chance) {
-    return source.split('').map(ch => Math.random() < chance ? String.fromCharCode(48 + Math.floor(Math.random()*10)) : ch).join('');
-  }
-
-  function addLog(text, level = 1) {
-    const now = state.time;
-    state.logs.unshift({ text, time: now, level });
-    while (state.logs.length > 24) state.logs.pop();
-  }
-
-  function generateField() {
-    const nodes = [];
-    const ringCounts = [1, 6, 10, 14];
-    for (let ring = 0; ring < ringCounts.length; ring++) {
-      const count = ringCounts[ring];
-      const radius = 80 + ring * 118;
-      for (let i = 0; i < count; i++) {
-        const angle = (Math.PI*2 / count) * i + ring * 0.18;
-        const jitter = (Math.random()-0.5) * 22;
-        const x = Math.cos(angle) * radius + width/2 + Math.sin(ring + i*0.4) * 18;
-        const y = Math.sin(angle) * radius + height/2 + Math.cos(ring + i*0.6) * 18;
-        const template = nodeTemplates[(ring + i) % nodeTemplates.length];
-        const hidden = (ring === 3 && i === 3) || (ring === 2 && i === 7);
-        nodes.push({
-          id: `NODE-${ring}-${i}`,
-          label: template.type,
-          prompt: template.prompt,
-          color: template.palette,
-          x, y,
-          radius: 16 + Math.random() * 6,
-          hidden,
-          state: 0,
-          active: false,
-          interactions: 0,
-          reach: 42,
-          ghost: hidden && Math.random() < 0.26,
-        });
+  function buildGrid() {
+    state.grid = [];
+    for (let y = 0; y < state.rows; y++) {
+      for (let x = 0; x < state.cols; x++) {
+        const freq = 1 + Math.floor(Math.random() * 5);
+        const ghost = Math.random() < 0.12;
+        state.grid.push({ x, y, freq, engaged: false, charge: 0, ghost, discovered: !ghost, pulse: 0, hidden: ghost });
       }
     }
-    return nodes;
+    const anchor = state.grid[Math.floor(Math.random()*state.grid.length)];
+    anchor.freq = state.phase;
+    anchor.engaged = true;
+    anchor.discovered = true;
+    anchor.hidden = false;
+    state.activated = 1;
   }
 
-  function buildParticles() {
-    const particles = [];
-    for (let i = 0; i < 120; i++) {
-      particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        size: Math.random() * 1.6 + 0.4,
-        speed: Math.random() * 8 + 2,
-        alpha: Math.random() * 0.55 + 0.2,
-        phase: Math.random() * Math.PI*2,
-      });
-    }
-    return particles;
+  function tileAt(x,y){return state.grid.find(t=>t.x===x&&t.y===y);}
+  function index(x,y){return y*state.cols+x;}
+
+  function addLog(text, level=1) {
+    state.logs.unshift({ text, time: state.time, level });
+    if (state.logs.length > 18) state.logs.pop();
   }
 
   function initAudio() {
@@ -227,590 +154,391 @@
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
     const audio = new AudioContext();
-    const gainMaster = audio.createGain();
-    gainMaster.gain.value = 0.14;
-    gainMaster.connect(audio.destination);
-
-    const hum = audio.createOscillator();
-    hum.type = 'sine';
-    hum.frequency.value = 55;
-    const humGain = audio.createGain();
-    humGain.gain.value = 0.008;
-    hum.connect(humGain);
-    humGain.connect(gainMaster);
-    hum.start();
+    const gain = audio.createGain();
+    gain.gain.value = 0.16;
+    gain.connect(audio.destination);
 
     const drone = audio.createOscillator();
-    drone.type = 'triangle';
-    drone.frequency.value = 118;
+    drone.type = 'sawtooth';
+    drone.frequency.value = 58;
     const droneGain = audio.createGain();
-    droneGain.gain.value = 0.0032;
+    droneGain.gain.value = 0.006;
     drone.connect(droneGain);
-    droneGain.connect(gainMaster);
+    droneGain.connect(gain);
     drone.start();
 
-    const noiseBuffer = audio.createBuffer(1, audio.sampleRate * 1.5, audio.sampleRate);
-    const data = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = (Math.random()*2-1) * 0.12;
-    const noiseSrc = audio.createBufferSource();
-    noiseSrc.buffer = noiseBuffer;
-    noiseSrc.loop = true;
-    const noiseGain = audio.createGain();
-    noiseGain.gain.value = 0.0026;
-    noiseSrc.connect(noiseGain);
-    noiseGain.connect(gainMaster);
-    noiseSrc.start();
+    const pulse = audio.createOscillator();
+    pulse.type = 'sine';
+    pulse.frequency.value = 120;
+    const pulseGain = audio.createGain();
+    pulseGain.gain.value = 0;
+    pulse.connect(pulseGain);
+    pulseGain.connect(gain);
+    pulse.start();
 
-    const glitchGain = audio.createGain();
-    glitchGain.gain.value = 0;
-    glitchGain.connect(gainMaster);
-    const glitchOsc = audio.createOscillator();
-    glitchOsc.type = 'square';
-    glitchOsc.frequency.value = 134;
-    glitchOsc.connect(glitchGain);
-    glitchOsc.start();
+    const noise = audio.createBufferSource();
+    const buf = audio.createBuffer(1, audio.sampleRate * 1.2, audio.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.08;
+    noise.buffer = buf;
+    noise.loop = true;
+    const noiseGain = audio.createGain();
+    noiseGain.gain.value = 0.0018;
+    noise.connect(noiseGain);
+    noiseGain.connect(gain);
+    noise.start();
 
     state.audio = audio;
-    state.audioNodes = { gainMaster, glitchGain, humGain, droneGain, noiseGain };
+    state.audioNodes = { gain, pulseGain, droneGain };
   }
 
-  function playPulse(strength = 0.8, duration = 0.08) {
+  function pulseSound(strength=0.08,dur=0.08) {
     if (!state.audioNodes) return;
-    const now = state.audio.currentTime;
-    const gain = state.audioNodes.gainMaster.gain;
-    gain.cancelScheduledValues(now);
-    gain.setValueAtTime(0.14, now);
-    gain.linearRampToValueAtTime(0.14 + strength*0.12, now + duration * 0.2);
-    gain.linearRampToValueAtTime(0.14, now + duration);
-  }
-
-  function triggerAudioGlitch(force = 1) {
-    if (!state.audioNodes) return;
-    const g = state.audioNodes.glitchGain;
     const t = state.audio.currentTime;
-    g.cancelScheduledValues(t);
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(0.03 * force, t + 0.002);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+    const pg = state.audioNodes.pulseGain.gain;
+    pg.cancelScheduledValues(t);
+    pg.setValueAtTime(0, t);
+    pg.linearRampToValueAtTime(strength, t + 0.01);
+    pg.linearRampToValueAtTime(0, t + dur);
   }
 
-  function scheduleEvent() {
-    const now = state.time;
-    const next = lerp(5.4, 1.8, clamp(state.time / 120, 0, 1));
-    state.eventRate = 10000 * next - state.anomaly * 60;
-    state.eventRate = Math.max(2400, state.eventRate + (Math.random() - 0.5) * 1400);
-    state.lastEventAt = now;
-    const roll = Math.random();
-    if (roll < 0.16) return spawnEvent('phantom');
-    if (roll < 0.38) return spawnEvent('flicker');
-    if (roll < 0.65) return spawnEvent('corruption');
-    if (roll < 0.85) return spawnEvent('glitch');
-    return spawnEvent('crash');
+  function setPhase(value) {
+    state.phase = clamp(value,1,5);
+    addLog(`[PHASE] tuning set to ${phaseNames[state.phase]} (${state.phase})`, 1);
+    pulseSound(0.12, 0.1);
   }
 
-  function spawnEvent(type) {
-    const strength = 0.14 + Math.random() * 0.28 + state.anomaly * 0.002;
-    state.events.push({ type, strength, time: state.time, duration: 1.6 + Math.random() * 1.2, detail: Math.random() });
-    state.glitch.strength = Math.max(state.glitch.strength, strength);
-    state.glitch.timer = 0.4 + Math.random() * 0.5;
-    state.corruption.timer = type === 'corruption' ? 2.2 + Math.random() * 1.6 : state.corruption.timer;
-    if (type === 'crash') {
-      addLog('[SYSTEM] unexpected fault in layer 3.', 2);
-      triggerAudioGlitch(1.8);
-    } else if (type === 'phantom') {
-      addLog('[ENTITY] a hidden thread crossed your path.', 2);
+  function inspectTile() {
+    if (state.failed || state.completed) return;
+    const tile = tileAt(state.cursor.x, state.cursor.y);
+    if (!tile) return;
+    state.lastInspect = state.time;
+    if (tile.hidden && !tile.discovered) {
+      tile.discovered = true;
+      tile.hidden = false;
+      addLog('[INSPECT] hidden node surfaced in the echo.', 2);
       state.anomaly += 4;
-      if (Math.random() < 0.3) state.secret.whisper = true;
-      triggerAudioGlitch(1.2);
-    } else if (type === 'glitch') {
-      addLog('[NETWORK] minor corruption detected.', 1);
-      state.anomaly += 2;
-      triggerAudioGlitch(0.8);
-    } else if (type === 'flicker') {
-      addLog('[DISPLAY] brief offset in scan.', 1);
-      triggerAudioGlitch(0.6);
-    } else if (type === 'corruption') {
-      addLog('[UI] text layers are misaligned.', 2);
-      state.anomaly += 3;
-      state.sanity += 1;
-      triggerAudioGlitch(1.0);
-    }
-  }
-
-  function updateNodeActivation() {
-    state.activeNode = null;
-    state.field.forEach(node => {
-      const dx = node.x - state.cursor.x;
-      const dy = node.y - state.cursor.y;
-      const dist = Math.hypot(dx, dy);
-      node.active = dist < node.reach;
-      if (node.active) state.activeNode = node;
-    });
-  }
-
-  function handleInteraction() {
-    if (!state.activeNode || state.completed || state.failed) return;
-    const node = state.activeNode;
-    node.interactions += 1;
-    state.memory.interactions += 1;
-    state.progress += 1;
-    state.activeStreak += 1;
-    node.state = Math.min(1, node.state + 0.2);
-    state.coreCharge += 4 + node.state * 2;
-    state.score += 14 + Math.round(node.state * 10) + (node.hidden ? 12 : 0);
-    state.energy = clamp(state.energy + 3 + node.state * 5, 0, 120);
-    state.anomaly += 1.1;
-    state.sanity += 0.35;
-
-    if (node.label === 'RELAY') {
-      const relief = 1.8 + node.state * 1.4;
-      state.anomaly = clamp(state.anomaly - relief, 0, 110);
-      state.score += 8;
-      addLog('[RELAY] signal decay suppressed.', 1);
-    }
-    if (node.label === 'ARCHIVE') {
-      state.score += 10;
-      addLog('[ARCHIVE] stale memory recombined into a usable pattern.', 1);
-    }
-    if (node.label === 'MIRROR') {
-      state.score += 12;
-      addLog('[MIRROR] reflection creates a new hidden trajectory.', 1);
-      if (node.interactions === 2 && !state.secret.mirror) {
-        state.secret.mirror = true;
-        addLog('[SECRET] reflection loop unlocked. a new path appears.', 3);
-        state.field.push(createGhostNode());
+      state.hiddenNodes += 1;
+      if (state.hiddenNodes >= 3 && !state.secretOpen) {
+        state.secretOpen = true;
+        addLog('[SECRET] a deeper resonance has been exposed.', 3);
+        state.target += 4;
       }
+      pulseSound(0.18, 0.14);
+      return;
     }
-    if (node.label === 'TERMINAL') {
-      state.energy = clamp(state.energy + 9, 0, 130);
-      state.anomaly = clamp(state.anomaly - 0.8, 0, 110);
-      addLog('[TERMINAL] power allocation stabilized.', 1);
+    if (tile.engaged) {
+      addLog('[INSPECT] this node is actively tuning.', 1);
+      return;
     }
-
-    addLog(`[INTERACT] ${node.label}: ${node.prompt}`, 1);
-
-    if (node.hidden && node.interactions === 1) {
-      addLog('[DISCOVERY] hidden protocol fragment exposed.', 2);
-      state.secret.archive = true;
-      state.score += 18;
-    }
-    if (state.memory.interactions > 12 && !state.secret.revealedText && Math.random() < 0.28) {
-      state.secret.revealedText = true;
-      addLog('[MEMORY] the network begins to speak in its own words.', 3);
-    }
-    if (node.interactions > 5 && !node.ghost) {
-      node.ghost = true;
-      addLog('[ANOMALY] unusual substructure stains this node.', 2);
-    }
-    if (state.input.secret && node.label === 'ARCHIVE' && !state.secret.sleeper) {
-      state.secret.sleeper = true;
-      addLog('[SLEEPER] the system responds to your silence.', 3);
-    }
-    if (state.input.inspect && node.label === 'RELAY' && !state.secret.whisper) {
-      state.secret.whisper = true;
-      addLog('[WHISPER] the hidden channel has opened.', 3);
-    }
-    if (node.interactions % 2 === 0 && Math.random() < 0.18) {
-      state.corruption.timer = 0.8 + Math.random() * 0.8;
-    }
-    if (state.progress >= state.goal && !state.completed) {
-      state.completed = true;
-      state.objective = 'Network stabilized. secrets are accessible.';
-      addLog('[CORE] threshold reached. the network stabilizes briefly.', 3);
-      playPulse(0.24, 0.18);
-    }
-    playPulse(0.12, 0.12);
+    addLog(`[INSPECT] frequency ${tile.freq} detected. align with phase ${state.phase}.`, 1);
   }
 
-  function createGhostNode() {
-    const angle = Math.random() * Math.PI*2;
-    const radius = 148 + Math.random() * 42;
-    const x = width/2 + Math.cos(angle) * radius;
-    const y = height/2 + Math.sin(angle) * radius;
-    return {
-      id: `GHOST-${Math.round(Math.random()*1000)}`,
-      label: 'ECHO',
-      prompt: 'Access the hidden echo.',
-      color: [255, 132, 252],
-      x, y, radius: 14, hidden: true, state: 0.2, active: false, interactions: 0, reach: 46, ghost: true,
-    };
-  }
-
-  function update(dt) {
-    state.rawTime += dt;
-    state.time += dt * (1 + state.anomaly * 0.0014);
-    state.phase = Math.min(5, Math.floor(state.time / 32));
-    if (state.time - state.lastEventAt > state.eventRate) scheduleEvent();
-
-    const speed = state.cursor.speed * (state.input.secret ? 0.82 : 1);
-    const axisX = (state.input.right ? 1 : 0) - (state.input.left ? 1 : 0);
-    const axisY = (state.input.down ? 1 : 0) - (state.input.up ? 1 : 0);
-    const move = Math.hypot(axisX, axisY);
-    if (move > 0) {
-      state.cursor.vx = axisX / move * speed;
-      state.cursor.vy = axisY / move * speed;
-      state.cursor.still = 0;
+  function toggleTile() {
+    if (state.failed || state.completed) return;
+    const tile = tileAt(state.cursor.x, state.cursor.y);
+    if (!tile || tile.hidden) return;
+    tile.engaged = !tile.engaged;
+    if (tile.engaged) {
+      addLog(`[ENGAGED] node ${tile.x},${tile.y} locked to phase ${state.phase}.`, 1);
+      if (tile.freq === state.phase) {
+        state.score += 12;
+      } else {
+        state.anomaly += 5;
+      }
     } else {
-      state.cursor.vx *= 0.88;
-      state.cursor.vy *= 0.88;
-      if (Math.hypot(state.cursor.vx, state.cursor.vy) < 2) {
-        state.cursor.vx = 0; state.cursor.vy = 0; state.cursor.still += dt;
+      addLog(`[RELEASE] node ${tile.x},${tile.y} released.`, 1);
+    }
+    pulseSound(0.14, 0.12);
+  }
+
+  function moveCursor(dx,dy) {
+    if (state.failed || state.completed) return;
+    state.cursor.x = clamp(state.cursor.x + dx, 0, state.cols - 1);
+    state.cursor.y = clamp(state.cursor.y + dy, 0, state.rows - 1);
+  }
+
+  function updateGrid(dt) {
+    state.scan += dt * state.scanSpeed;
+    if (state.scan > state.cols) {
+      state.scan -= state.cols;
+      state.stage += 1;
+      addLog('[SCAN] sweep complete. resonance patterns are shifting.', 1);
+      if (Math.random() < 0.18) state.anomaly += 2;
+      if (state.stage % 3 === 0) state.energy -= 3;
+      if (state.stage === 6) state.target += 2;
+    }
+
+    const lineX = Math.floor(state.scan);
+    state.grid.forEach(tile => {
+      if (!tile.engaged) {
+        if (tile.charge > 0) tile.charge = clamp(tile.charge - dt * 0.2, 0, 1);
+        return;
       }
-    }
-    state.cursor.x += state.cursor.vx * dt;
-    state.cursor.y += state.cursor.vy * dt;
-    state.cursor.x = clamp(state.cursor.x, 0, width);
-    state.cursor.y = clamp(state.cursor.y, 0, height);
-
-    if (state.cursor.vx || state.cursor.vy) {
-      state.energy -= dt * 0.4;
-      state.memory.stillness = 0;
-    } else {
-      state.energy -= dt * 0.16;
-      state.memory.stillness += dt;
-    }
-
-    if (state.memory.stillness > 11 && !state.secret.sleeper) {
-      state.secret.sleeper = true;
-      addLog('[SILENCE] remaining motionless reveals the sleeper archive.', 3);
-      state.field.push({
-        id: 'SLEEPER-01', label: 'SLEEPER', prompt: 'A suspended process notices you.', color: [255, 255, 163], x: width/2 + 18, y: height/2 - 92, radius: 18, hidden: true, state: 0.3, active: false, interactions: 0, reach: 54, ghost: true,
-      });
-    }
-
-    if (state.energy < 18) {
-      state.anomaly += dt * 0.6;
-      state.sanity += dt * 0.1;
-    }
-    if (state.anomaly > 78) {
-      state.sanity += dt * 0.35;
-    }
-    if (state.sanity > 96) state.sanity = 96;
-    if (state.anomaly > 110) state.anomaly = 110;
-    if (state.energy < 0) state.energy = 0;
-    if (state.energy > 130) state.energy = 130;
-
-    state.anomaly = clamp(state.anomaly, 0, 110);
-    state.sanity = clamp(state.sanity, 0, 100);
-
-    state.field.forEach(node => {
-      const drift = Math.sin(state.time * 0.9 + node.x * 0.002 + node.y * 0.004) * 0.15;
-      node.state = clamp(node.state + (node.active ? 0.02 : -0.008) * dt + drift * 0.001, 0, 1);
+      const match = tile.freq === state.phase;
+      const over = tile.freq !== state.phase;
+      const withinWave = Math.abs(tile.x - lineX) < 1;
+      if (withinWave) {
+        if (match) {
+          tile.charge = clamp(tile.charge + dt * 0.32, 0, 1);
+          state.stability = clamp(state.stability + dt * 0.9, 0, 100);
+          state.score += 1;
+        } else {
+          tile.charge = clamp(tile.charge + dt * 0.18, 0, 1);
+          state.anomaly = clamp(state.anomaly + dt * 1.8, 0, 120);
+          state.stability = clamp(state.stability - dt * 0.8, 0, 100);
+        }
+      }
+      if (tile.charge > 0.96 && match && !tile.settled) {
+        tile.settled = true;
+        state.activated += 1;
+        state.score += 22;
+        addLog('[RESOLVE] node stabilized by coherent phase alignment.', 2);
+      }
     });
 
-    updateNodeActivation();
-
-    if (state.input.interact) {
-      handleInteraction();
-      state.input.interact = false;
-    }
-    if (state.input.inspect) {
-      state.input.inspect = false;
-      if (state.activeNode) {
-        addLog(`[INSPECT] ${state.activeNode.label} contains latent fragments.`, 1);
-        state.anomaly += 1.4;
-        state.shimmer = true;
-      }
-    }
-
-    state.events = state.events.filter(event => {
-      const active = state.time - event.time < event.duration;
-      if (active) {
-        if (event.type === 'crash') state.glitch.strength = Math.max(state.glitch.strength, 0.16);
-      }
-      return active;
-    });
-
-    state.glitch.timer -= dt;
-    if (state.glitch.timer < 0) state.glitch.strength *= 0.92;
-    state.corruption.timer -= dt;
-    state.corruption.framed = state.corruption.timer > 0 ? Math.random() * 2 : 0;
-    state.glitch.sway = Math.sin(state.time * 12) * 0.8;
+    if (state.energy > 0) state.energy = clamp(state.energy - dt * 0.14, 0, 100);
+    if (state.anomaly > 0 && state.anomaly < 100 && state.energy < 28) state.anomaly = clamp(state.anomaly + dt * 0.7, 0, 120);
+    if (state.stability < 20) state.anomaly = clamp(state.anomaly + dt * 0.5, 0, 120);
 
     if (!state.completed && !state.failed) {
       if (state.energy <= 0) {
         state.failed = true;
-        state.objective = 'Energy collapse. the lattice shatters.';
-        addLog('[SYSTEM] energy collapse. the network starts to fracture.', 3);
+        addLog('[FAIL] power drains. the echo collapses into static.', 3);
       }
       if (state.anomaly >= 100) {
         state.failed = true;
-        state.objective = 'Anomaly overload. the system rejects your presence.';
-        addLog('[SYSTEM] anomaly overload. the network is rejecting input.', 3);
+        addLog('[FAIL] anomaly saturated. the grid repels your touch.', 3);
+      }
+      if (state.activated >= state.target) {
+        state.completed = true;
+        addLog('[SUCCESS] resonance threshold met. hidden frequencies hum softly.', 3);
       }
     }
+  }
 
-    const eventReady = state.time - state.lastEventAt > state.eventRate;
-    if (eventReady && !state.completed && !state.failed) scheduleEvent();
+  function draw() {
+    ctx.clearRect(0,0,width,height);
+    drawBackground();
+    drawGrid();
+    drawCursor();
+    drawScan();
+    drawOverlay();
+    renderHud();
+    renderLogs();
   }
 
   function drawBackground() {
-    const grad = ctx.createRadialGradient(width*0.45, height*0.27, 0, width*0.45, height*0.27, height*0.8);
-    grad.addColorStop(0, 'rgba(35, 62, 99, 0.18)');
-    grad.addColorStop(0.6, 'rgba(4, 8, 16, 0.9)');
-    grad.addColorStop(1, '#05050b');
+    const grad = ctx.createRadialGradient(width*0.5, height*0.3, 0, width*0.5, height*0.3, height*0.9);
+    grad.addColorStop(0, 'rgba(50, 86, 133, 0.16)');
+    grad.addColorStop(1, '#04050c');
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, width, height);
-
-    const gridHue = 200 + Math.sin(state.time * 0.12) * 20;
-    ctx.strokeStyle = `rgba(75, 136, 178, 0.08)`;
-    ctx.lineWidth = 1;
-    for (let x = -20; x < width + 80; x += 42) {
+    ctx.fillRect(0,0,width,height);
+    for (let i = 0; i < 12; i++) {
+      const alpha = 0.02 + Math.sin(state.time*0.8 + i) * 0.01;
+      ctx.strokeStyle = `rgba(116, 208, 255, ${alpha})`;
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(x + Math.sin((state.time*0.8 + x)*0.04) * 6, 0);
-      ctx.lineTo(x + Math.sin((state.time*0.8 + x)*0.04) * 6, height);
+      ctx.arc(width/2, height/2, 120 + i*42, 0, Math.PI*2);
       ctx.stroke();
     }
-    for (let y = -20; y < height + 80; y += 42) {
-      ctx.beginPath();
-      ctx.moveTo(0, y + Math.cos((state.time*0.9 + y)*0.03) * 6);
-      ctx.lineTo(width, y + Math.cos((state.time*0.9 + y)*0.03) * 6);
-      ctx.stroke();
-    }
-
-    state.particles.forEach(p => {
-      p.y -= p.speed * 0.25;
-      p.x += Math.sin(state.time*0.16 + p.phase) * 0.1;
-      if (p.y < -10) { p.y = height + 10; p.x = Math.random() * width; }
-      ctx.fillStyle = `rgba(170, 225, 255, ${p.alpha * 0.45})`;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-      ctx.fill();
-    });
   }
 
-  function drawNodes() {
-    const centerAlpha = 0.16 + Math.sin(state.time * 0.18) * 0.04;
-    ctx.strokeStyle = `rgba(105, 200, 255, ${centerAlpha})`;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(width/2, height/2, 96, 0, Math.PI*2);
-    ctx.stroke();
+  function drawGrid() {
+    state.grid.forEach(tile => {
+      const x = state.offsetX + tile.x * state.tileSize;
+      const y = state.offsetY + tile.y * state.tileSize;
+      const s = state.tileSize * 0.92;
+      const cx = x + state.tileSize * 0.5;
+      const cy = y + state.tileSize * 0.5;
+      const radius = s * 0.42;
 
-    state.field.forEach(node => {
-      const dx = node.x - width/2;
-      const dy = node.y - height/2;
-      const drift = Math.sin((state.time + node.x*0.01) * 0.7) * 4;
-      const x = node.x + Math.cos(node.y*0.005) * 0.9;
-      const y = node.y + drift * 0.1;
-      const activated = node.active ? 1 : 0;
-      const glow = 0.16 + node.state * 0.28 + activated * 0.18;
-      const hue = node.color[0];
-      ctx.fillStyle = `rgba(${node.color[0]}, ${node.color[1]}, ${node.color[2]}, ${0.24 + glow * 0.6})`;
+      const base = tile.hidden && !tile.discovered ? 'rgba(90, 100, 140, 0.18)' : `rgba(${28 + tile.freq*35}, ${84 + tile.freq*30}, ${172 - tile.freq*18}, 0.18)`;
+      ctx.fillStyle = base;
       ctx.beginPath();
-      ctx.arc(x, y, node.radius * (1 + node.state * 0.22), 0, Math.PI*2);
+      ctx.roundRect(x + state.tileSize*0.04, y + state.tileSize*0.04, s, s, 14);
       ctx.fill();
-      ctx.strokeStyle = `rgba(${node.color[0]}, ${node.color[1]}, ${node.color[2]}, ${0.48 + glow * 0.2})`;
-      ctx.lineWidth = 1.2;
+
+      if (tile.hidden && !tile.discovered) {
+        ctx.strokeStyle = 'rgba(180, 200, 255, 0.08)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        return;
+      }
+
+      ctx.strokeStyle = tile.engaged ? `rgba(255,255,255,0.8)` : 'rgba(120, 190, 255, 0.16)';
+      ctx.lineWidth = tile.engaged ? 2.4 : 1.2;
       ctx.beginPath();
-      ctx.arc(x, y, node.radius + 4, 0, Math.PI*2);
+      ctx.roundRect(x + state.tileSize*0.06, y + state.tileSize*0.06, s*0.88, s*0.88, 12);
       ctx.stroke();
-      if (node.ghost) {
-        ctx.strokeStyle = `rgba(255,255,255,0.1)`;
-        ctx.lineWidth = 0.9;
+
+      const fillColor = tile.engaged ? `rgba(${22 + tile.freq*43}, ${180 - tile.freq*20}, ${255 - tile.freq*30}, 0.95)` : `rgba(255,255,255,0.14)`;
+      ctx.fillStyle = fillColor;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.fillStyle = tile.engaged ? '#04050c' : '#b5f1ff';
+      ctx.font = `${Math.round(state.tileSize*0.28)}px ui-monospace, monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(tile.freq, cx, cy);
+
+      if (tile.charge > 0.03) {
+        ctx.strokeStyle = `rgba(255,255,255,${0.12 + tile.charge * 0.28})`;
+        ctx.lineWidth = 2.2;
         ctx.beginPath();
-        ctx.arc(x, y, node.radius + 16, 0, Math.PI*2);
+        ctx.arc(cx, cy, radius + 12, 0, Math.PI*2 * tile.charge);
+        ctx.stroke();
+      }
+      if (tile.settled) {
+        ctx.strokeStyle = 'rgba(255, 224, 145, 0.65)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius + 18, 0, Math.PI*2);
         ctx.stroke();
       }
     });
-
-    for (let i = 0; i < 14; i++) {
-      const a = i / 14 * Math.PI*2 + state.time * 0.03;
-      const r = 76 + 96 * Math.abs(Math.sin(state.time * 0.09 + i));
-      const x = width/2 + Math.cos(a) * r;
-      const y = height/2 + Math.sin(a) * r;
-      ctx.fillStyle = `rgba(79, 143, 201, 0.09)`;
-      ctx.beginPath(); ctx.arc(x, y, 3 + Math.sin(state.time*2 + i)*1.1, 0, Math.PI*2); ctx.fill();
-    }
-  }
-
-  function drawConnections() {
-    ctx.strokeStyle = 'rgba(92, 170, 217, 0.14)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < state.field.length - 1; i++) {
-      const a = state.field[i];
-      const b = state.field[(i + 3) % state.field.length];
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      const cx = (a.x + b.x) / 2 + Math.cos(i + state.time * 0.08) * 18;
-      const cy = (a.y + b.y) / 2 + Math.sin(i + state.time * 0.07) * 18;
-      ctx.quadraticCurveTo(cx, cy, b.x, b.y);
-      ctx.stroke();
-    }
   }
 
   function drawCursor() {
-    const trail = Math.min(1, Math.hypot(state.cursor.vx, state.cursor.vy) / 120);
-    const glow = 0.18 + trail * 0.4 + state.anomaly * 0.002;
-    ctx.save();
-    ctx.translate(state.cursor.x, state.cursor.y);
-    ctx.rotate(state.time * 0.6);
-    ctx.fillStyle = `rgba(159, 255, 255, ${0.28 + glow})`;
+    const x = state.offsetX + state.cursor.x * state.tileSize;
+    const y = state.offsetY + state.cursor.y * state.tileSize;
+    const s = state.tileSize * 0.96;
+    ctx.strokeStyle = 'rgba(189, 255, 255, 0.96)';
+    ctx.lineWidth = 2.6;
     ctx.beginPath();
-    ctx.arc(0, 0, 12 + trail * 4, 0, Math.PI*2);
-    ctx.fill();
-    ctx.strokeStyle = `rgba(105, 198, 255, ${0.9})`;
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(0, 0, 18 + trail * 6, 0, Math.PI*2); ctx.stroke();
-    ctx.restore();
-    ctx.fillStyle = `rgba(255,255,255,0.06)`;
-    ctx.beginPath(); ctx.arc(state.cursor.x, state.cursor.y, 36, 0, Math.PI*2); ctx.fill();
+    ctx.roundRect(x + state.tileSize*0.02, y + state.tileSize*0.02, s, s, 16);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(105, 235, 255, 0.06)';
+    ctx.fillRect(x + state.tileSize*0.02, y + state.tileSize*0.02, s, s);
+  }
+
+  function drawScan() {
+    const sweep = (state.scan / state.cols) * (state.tileSize * state.cols);
+    ctx.fillStyle = 'rgba(120, 232, 255, 0.06)';
+    ctx.fillRect(state.offsetX + sweep, state.offsetY, 22, state.tileSize * state.rows);
+    ctx.fillStyle = 'rgba(120, 232, 255, 0.14)';
+    ctx.fillRect(state.offsetX + sweep + 22, state.offsetY, 6, state.tileSize * state.rows);
   }
 
   function drawOverlay() {
-    if (state.corruption.timer > 0) {
-      ctx.fillStyle = `rgba(9, 12, 22, ${Math.sin(state.corruption.timer * 3.5) * 0.07 + 0.08})`;
-      ctx.fillRect(0, 0, width, height);
+    if (state.failed) {
+      ctx.fillStyle = 'rgba(4, 8, 18, 0.62)';
+      ctx.fillRect(0,0,width,height);
+      ctx.fillStyle = 'rgba(255,110,110,0.92)';
+      ctx.font = '38px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('GRID FRACTURED', width/2, height/2);
     }
-    if (state.glitch.strength > 0.02) {
-      const offset = state.glitch.sway * state.glitch.strength * 8;
-      ctx.save();
-      ctx.globalAlpha = state.glitch.strength * 0.2;
-      ctx.fillStyle = `rgba(255,255,255,0.06)`;
-      for (let y = 0; y < height; y += 8) {
-        const pattern = ((y + offset) % 16) > 8 ? 0.04 : 0.0;
-        ctx.fillRect(0, y, width, 2,);
-      }
-      ctx.restore();
-      ctx.save();
-      ctx.translate(offset, 0);
-      ctx.globalCompositeOperation = 'screen';
-      ctx.strokeStyle = `rgba(255,255,255,${0.04 + state.glitch.strength*0.04})`;
-      for (let i = 0; i < 4; i++) {
-        ctx.beginPath();
-        ctx.moveTo(0, i * 120 + (state.time*20 % 120));
-        ctx.lineTo(width, i * 120 + (state.time*20 % 120));
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-    if (state.secret.whisper && Math.sin(state.time * 8) > 0.8) {
-      ctx.fillStyle = `rgba(108, 173, 255, 0.08)`;
-      ctx.fillRect(0, height*0.12, width, height*0.14);
+    if (state.completed) {
+      ctx.fillStyle = 'rgba(2, 8, 14, 0.68)';
+      ctx.fillRect(0,0,width,height);
+      ctx.fillStyle = 'rgba(159, 255, 222, 0.94)';
+      ctx.font = '38px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('RESIDUE SYNCHRONIZED', width/2, height/2);
     }
   }
 
-  function drawHud() {
-    nodeNameEl.textContent = state.activeNode ? `${state.activeNode.label} ${state.activeNode.hidden ? '(latent)' : ''}` : 'Idle';
-    energyEl.textContent = `${formatValue(state.energy, 3)} / 120`;
-    scoreValueEl.textContent = formatValue(state.score, 4);
-    sanityEl.textContent = `${formatValue(state.sanity, 3)}%`;
-    anomalyEl.textContent = `${formatValue(state.anomaly, 3)}%`;
-    phaseEl.textContent = ['Curious', 'Warm', 'Uneasy', 'Obsessed', 'Paranoid', 'Beyond'][state.phase] || 'Unknown';
-    goalValueEl.textContent = state.completed ? 'STABILIZED' : state.failed ? 'FRACTURED' : `${state.progress}/${state.goal}`;
+  function renderHud() {
+    phaseValue.textContent = `${phaseNames[state.phase]} (${state.phase})`;
+    stabilityValue.textContent = `${Math.round(state.stability)}%`;
+    energyValue.textContent = `${Math.round(state.energy)}%`;
+    anomalyValue.textContent = `${Math.round(state.anomaly)}%`;
+    targetValue.textContent = `${state.activated}/${state.target}`;
+    objectiveValue.textContent = state.failed ? 'COLLAPSE' : state.completed ? 'HARMONY' : 'align nodes to the current phase';
+  }
 
+  function renderLogs() {
     logEl.innerHTML = '';
-    state.logs.forEach((entry, idx) => {
+    state.logs.forEach(entry => {
       const age = state.time - entry.time;
-      const fade = clamp(1 - age / 18, 0, 1);
+      const opacity = clamp(1 - age / 16, 0, 1);
       const line = document.createElement('div');
-      line.className = 'log-line';
-      if (entry.level > 1) line.style.color = 'rgba(255, 136, 100, 0.92)';
-      if (entry.level > 2) line.style.color = 'rgba(255, 202, 122, 0.96)';
+      line.className = 'line';
       line.textContent = entry.text;
-      line.style.opacity = fade;
+      line.style.opacity = opacity;
+      if (entry.level > 1) line.style.color = 'rgba(255, 176, 95, 0.96)';
+      if (entry.level > 2) line.style.color = 'rgba(255, 165, 165, 0.96)';
       logEl.appendChild(line);
     });
   }
 
-  function drawText() {
-    if (state.secret.revealedText && Math.sin(state.time*4) > 0.8) {
-      ctx.save();
-      ctx.globalAlpha = 0.15;
-      ctx.fillStyle = '#7bfffb';
-      ctx.font = '18px ui-monospace, monospace';
-      const text = state.secret.whisper ? messages.whispers[Math.floor(state.time*0.2)%messages.whispers.length] : messages.hidden[Math.floor(state.time*0.15)%messages.hidden.length];
-      const jitter = Math.sin(state.time*24) * 2;
-      ctx.fillText(seedText(text.toUpperCase(), 0.18), width*0.1 + jitter, height*0.18 + Math.sin(state.time*2)*6);
-      ctx.restore();
-    }
-    if (!state.started) return;
-    if (state.phase >= 4 && state.secret.archive && Math.random() < 0.01) {
-      ctx.save();
-      ctx.globalAlpha = 0.06;
-      ctx.fillStyle = '#99f2ff';
-      ctx.font = '24px ui-monospace, monospace';
-      ctx.fillText('0140: SUBSYSTEM DETECTED', width*0.08, height*0.75 + Math.sin(state.time*1.3)*18);
-      ctx.restore();
-    }
+  function loop(timestamp) {
+    if (!state.last) state.last = timestamp;
+    const dt = Math.min(0.033, (timestamp - state.last) / 1000);
+    state.last = timestamp;
+    if (state.started) updateGrid(dt);
+    state.time += dt;
+    draw();
+    requestAnimationFrame(loop);
   }
 
-  function render() {
-    drawBackground();
-    drawConnections();
-    drawNodes();
-    drawCursor();
-    drawOverlay();
-    drawText();
-    drawHud();
+  function startGame() {
+    state.started = true;
+    startEl.style.display = 'none';
+    initAudio();
+    addLog('[SYSTEM] echo grid activated. tune carefully.', 1);
   }
 
   function initInput() {
     window.addEventListener('keydown', e => {
-      if (!state.started) { state.started = true; hintEl.style.display = 'none'; initAudio(); }
-      const code = e.code;
-      if (code === 'ArrowUp' || code === 'KeyW') state.input.up = true;
-      if (code === 'ArrowDown' || code === 'KeyS') state.input.down = true;
-      if (code === 'ArrowLeft' || code === 'KeyA') state.input.left = true;
-      if (code === 'ArrowRight' || code === 'KeyD') state.input.right = true;
-      if (code === 'KeyE') state.input.interact = true;
-      if (code === 'KeyQ') state.input.inspect = true;
-      if (code === 'ShiftLeft' || code === 'ShiftRight') state.input.secret = true;
-      if (code === 'Space') {
-        state.input.interact = true;
-      }
-      if (code === 'KeyR') {
-        if (state.activeNode && state.activeNode.hidden) {
-          state.activeNode.interactions += 2;
-          addLog('[REVEAL] hidden channel forced open.', 2);
-          state.anomaly += 2.2;
-        }
+      if (!state.started) startGame();
+      if (e.code === 'ArrowUp') moveCursor(0,-1);
+      if (e.code === 'ArrowDown') moveCursor(0,1);
+      if (e.code === 'ArrowLeft') moveCursor(-1,0);
+      if (e.code === 'ArrowRight') moveCursor(1,0);
+      if (e.code === 'Space') toggleTile();
+      if (e.code === 'KeyQ') inspectTile();
+      if (e.code === 'Digit1') setPhase(1);
+      if (e.code === 'Digit2') setPhase(2);
+      if (e.code === 'Digit3') setPhase(3);
+      if (e.code === 'Digit4') setPhase(4);
+      if (e.code === 'Digit5') setPhase(5);
+      if (e.code === 'KeyR' && !state.failed && !state.completed) {
+        state.energy = clamp(state.energy + 12, 0, 100);
+        addLog('[RECHARGE] energy injected into the lattice.', 1);
+        pulseSound(0.18, 0.16);
       }
     });
-    window.addEventListener('keyup', e => {
-      const code = e.code;
-      if (code === 'ArrowUp' || code === 'KeyW') state.input.up = false;
-      if (code === 'ArrowDown' || code === 'KeyS') state.input.down = false;
-      if (code === 'ArrowLeft' || code === 'KeyA') state.input.left = false;
-      if (code === 'ArrowRight' || code === 'KeyD') state.input.right = false;
-      if (code === 'ShiftLeft' || code === 'ShiftRight') state.input.secret = false;
+    canvas.addEventListener('mousedown', e => {
+      if (!state.started) startGame();
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX - rect.left);
+      const my = (e.clientY - rect.top);
+      const x = Math.floor((mx - state.offsetX) / state.tileSize);
+      const y = Math.floor((my - state.offsetY) / state.tileSize);
+      if (x >= 0 && x < state.cols && y >= 0 && y < state.rows) {
+        state.cursor.x = x;
+        state.cursor.y = y;
+        toggleTile();
+      }
     });
-    window.addEventListener('mousedown', e => {
-      if (!state.started) { state.started = true; hintEl.style.display = 'none'; initAudio(); }
-      state.input.interact = true;
-    });
-    window.addEventListener('touchstart', e => {
-      e.preventDefault();
-      if (!state.started) { state.started = true; hintEl.style.display = 'none'; initAudio(); }
-      state.input.interact = true;
+    canvas.addEventListener('touchstart', e => {
+      if (!state.started) startGame();
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const mx = (touch.clientX - rect.left);
+      const my = (touch.clientY - rect.top);
+      const x = Math.floor((mx - state.offsetX) / state.tileSize);
+      const y = Math.floor((my - state.offsetY) / state.tileSize);
+      if (x >= 0 && x < state.cols && y >= 0 && y < state.rows) {
+        state.cursor.x = x;
+        state.cursor.y = y;
+        toggleTile();
+      }
     }, { passive: false });
   }
 
-  function animate(timestamp) {
-    if (!state.lastFrame) state.lastFrame = timestamp;
-    const dt = Math.min(0.033, (timestamp - state.lastFrame) / 1000);
-    state.lastFrame = timestamp;
-    update(dt);
-    render();
-    requestAnimationFrame(animate);
-  }
-
-  function start() {
-    resize();
-    state.field = generateField();
-    state.particles = buildParticles();
-    const startAngle = Math.random() * Math.PI * 2;
-    state.cursor.x = width / 2 + Math.cos(startAngle) * 58;
-    state.cursor.y = height / 2 + Math.sin(startAngle) * 58;
-    addLog('[SYSTEM] initialization complete. stabilize the network before anomaly rises.', 1);
-    addLog('[TIP] use arrow keys / WASD to move. press E to interact, Q to inspect, hold Shift for silent mode.', 1);
-    addLog(`[OBJECTIVE] activate ${state.goal} nodes to stabilize the core.`, 1);
-    initInput();
-    requestAnimationFrame(animate);
-  }
-
+  resize();
+  buildGrid();
+  initInput();
+  requestAnimationFrame(loop);
   window.addEventListener('resize', resize);
-  start();
 })();
 </script>
 </body>
